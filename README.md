@@ -1,0 +1,2 @@
+# SJI
+Simple Javascript Interpreter
