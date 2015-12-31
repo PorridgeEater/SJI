@@ -12,7 +12,7 @@ struct varValue {
 };
 ```
 
-###Activity Record
+### Activity Record
 - class ActRec
 	- addVar(string, varValue)
 		- void
@@ -24,7 +24,7 @@ struct varValue {
 		- get a variable value
 			- if none exists, varValue.valuetype = -1
 
-###Activity Record Manager
+### Activity Record Manager
 - class ActRecManager
 	- insert(ActRec ar)
 	- acquireValue(string varName)
