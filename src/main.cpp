@@ -12,6 +12,16 @@ using namespace std;
 
 int main(int argc, char const *argv[])
 {
+	/*
+	actRecManager.insertAR(ActRec());
+	actRecManager.addVar("abc");
+	VarValue *vp = actRecManager.acquireValuePointer("abc");
+	VarValue x(233);
+	*vp=x;
+	actRecManager.acquireValue("abc").print();
+	actRecManager.deleteAR();
+	cerr<<"######################################"<<endl;
+	*/
 	try{
 	    ifstream in("test.js");
 	    stringstream buffer;

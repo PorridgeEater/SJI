@@ -48,6 +48,7 @@ public:
 	int getSize();
 	void addVar(string varName, VarValue val);
 	VarValue getValue(string varName);
+	VarValue* getValuePointer(string varName);
 private:
 	map<string, VarValue> mapVar;	
 };
@@ -59,6 +60,7 @@ public:
 	bool deleteAR();
 	void addVar(string varName, VarValue val=VarValue());
 	VarValue acquireValue(string varName);
+	VarValue* acquireValuePointer(string varName);
 	ActRec& top();	// pay attention to copy construct
 private:
 	vector<ActRec> vecActRec;

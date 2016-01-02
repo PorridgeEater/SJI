@@ -262,6 +262,12 @@ VarValue ActRec::getValue(string varName) {
 	else throw Exception("No such a variable in this scope.");
 }
 
+VarValue* ActRec::getValuePointer(string varName) {
+	if (mapVar.count(varName))
+		return &(mapVar[varName]);
+	else throw Exception("No such a variable in this scope.");
+}
+
 // implement ActRecManager
 int ActRecManager::getSize() {
 	return vecActRec.size();
@@ -302,6 +308,19 @@ VarValue ActRecManager::acquireValue(string varName) {
 		try{
 			resValue = vecActRec[size].getValue(varName);
 			return resValue;
+		} catch (Exception e) {
+			continue;
+		}
+	}
+	throw Exception("No such a variable \""+varName+"\".");
+}
+
+VarValue* ActRecManager::acquireValuePointer(string varName) {
+	int size = getSize();
+	while (size--) {
+		try{
+			vecActRec[size].getValue(varName);
+			return vecActRec[size].getValuePointer(varName);
 		} catch (Exception e) {
 			continue;
 		}
