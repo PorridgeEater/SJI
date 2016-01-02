@@ -95,8 +95,8 @@ VarValue callFunction(const string name, const string argList){
 			ar.addVar(tmpName,var);
 		}
 	}
-	VarValue ret = interpreter(func.content);
 	actRecManager.insertAR(ar);
+	VarValue ret = interpreter(func.content);
 	return ret;
 	//需要interperter接受到ar之后做一个ARstack.push(ar)的操作
 }
