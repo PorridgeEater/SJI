@@ -2,7 +2,7 @@ var a = 0 ;
 var b = 1 ;
 var c = 2 ;
 
-function add(int a, int b)
+function add(a, b)
 {
 	return a + b;
 }
@@ -18,7 +18,7 @@ var n = 10 ;
 
 for ( var i = 0 ; i < n ; i = i+1 )
 {
-	c++
+	c = c + 1;
 }
 
 while (n) {
@@ -27,3 +27,10 @@ while (n) {
 }
 
 a = b;
+
+print a;
+print b;
+print c;
+print n;
+print i;
+print add(a,b);

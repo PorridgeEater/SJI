@@ -75,7 +75,6 @@ static void ifStatement(string condition, string content, string others) {
     // cout << condition << " " << content << endl;
     actRecManager.insertAR(ActRec());
     VarValue result = getExpResult(condition);
-    cout << "!" << endl;
     if (result.toBool()) {
         interpreter(content);
     }
