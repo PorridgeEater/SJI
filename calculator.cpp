@@ -27,7 +27,6 @@ static const int STRING_TYPE2 = 6;
 static const int TYPE_MAXNUM = 7;
 const VarValue UNDEFINED;// = (VarValue){-1, 0.0, ""};  //??
 
-static const int ITS_VAR = 0;
 static const int ITS_NUM = 1;
 static const int ITS_OP = 2;
 
@@ -39,7 +38,7 @@ bool isCharacter(char c) {
 	return (c>='a'&&c<='z') || (c>='A'&&c<='Z');
 }
 bool isOperator(char c) {
-	return c=='+' || c=='-' || c=='*' || c=='/' || c=='%' || c=='=';
+	return c=='+' || c=='-' || c=='*' || c=='/' || c=='%';
 }
 bool isSpace(char c) {
 	return c==' ' || c=='\t';
@@ -65,10 +64,8 @@ struct MyStream {
 struct NumOrOp {
 	int type;
 	VarValue num;
-	VarValue *var;
 	char op;
 	NumOrOp(VarValue a);
-	NumOrOp(VarValue *a);
 	NumOrOp(char c);
 };
 ostream &operator<<(ostream &out, NumOrOp t) {
@@ -196,7 +193,6 @@ string MyStream::_next() {
 
 
 NumOrOp::NumOrOp(VarValue a):num(a), type(ITS_NUM) {}
-NumOrOp::NumOrOp(VarValue *a):var(a), type(ITS_VAR), num(*a) {}
 NumOrOp::NumOrOp(char c):op(c), type(ITS_OP), num(UNDEFINED) {}
 
 
@@ -222,44 +218,19 @@ static bool isValid(int preType, int type) {
 }
 
 int getPd(char c) {
-	// if (c == '(') return -1;
-	if (c == '=') return 0;
+	if (c == '(') return 0;
 	if (c == '+' || c == '-') return 1;
 	if (c == '*' || c == '/' || c == '%') return 2;
-	// if (c == ')') return 3;
+	if (c == ')') return 3;
 	return -1;
 }
 static int cmpOp(char c1, char c2) {
 	return getPd(c1) - getPd(c2);
 }
 
-// void cal(vector<VarValue> &nums, char ch) {
-// 	VarValue b = nums[nums.size()-1]; nums.pop_back();
-// 	VarValue a = nums[nums.size()-1]; nums.pop_back();
-// 	// a.print(); cout<<a.getStrValue().size()<<endl; cout<<ch<<endl; b.print(); cout<<b.getStrValue().size()<<endl; cout<<endl;
-// 	VarValue c;
-// 	switch (ch) {
-// 	case '+': c=a+b; break;
-// 	case '-': c=a-b; break;
-// 	case '*': c=a*b; break;
-// 	case '/': c=a/b; break;
-// 	case '%': c=a%b; break;
-// 	default: break;
-// 	}
-// 	nums.push_back(c);
-// 	// c.print(); cout<<c.getStrValue().size()<<endl; cout<<endl<<endl;
-// }
-// static VarValue calSuffix(const vector<NumOrOp> &suf) {
-// 	vector<VarValue> nums;
-// 	for (int i=0; i<suf.size(); i++)
-// 		if (suf[i].type == ITS_NUM) nums.push_back(suf[i].num);
-// 		else cal(nums, suf[i].op);
-// 	assert(nums.size() == 1);
-// 	return nums[nums.size()-1];
-// }
-void cal(vector<NumOrOp> &nums, char ch) {
-	VarValue *pb = nums[nums.size()-1].var, b = nums[nums.size()-1].num; nums.pop_back();
-	VarValue *pa = nums[nums.size()-1].var, a = nums[nums.size()-1].num; nums.pop_back();
+void cal(vector<VarValue> &nums, char ch) {
+	VarValue b = nums[nums.size()-1]; nums.pop_back();
+	VarValue a = nums[nums.size()-1]; nums.pop_back();
 	// a.print(); cout<<a.getStrValue().size()<<endl; cout<<ch<<endl; b.print(); cout<<b.getStrValue().size()<<endl; cout<<endl;
 	VarValue c;
 	switch (ch) {
@@ -268,19 +239,18 @@ void cal(vector<NumOrOp> &nums, char ch) {
 	case '*': c=a*b; break;
 	case '/': c=a/b; break;
 	case '%': c=a%b; break;
-	case '=': c=(*pa=b); break; //TODO 加上赋值
 	default: break;
 	}
 	nums.push_back(c);
 	// c.print(); cout<<c.getStrValue().size()<<endl; cout<<endl<<endl;
 }
 static VarValue calSuffix(const vector<NumOrOp> &suf) {
-	vector<NumOrOp> nums;
+	vector<VarValue> nums;
 	for (int i=0; i<suf.size(); i++)
-		if (suf[i].type == ITS_NUM || suf[i].type == ITS_VAR) nums.push_back(suf[i]);
+		if (suf[i].type == ITS_NUM) nums.push_back(suf[i].num);
 		else cal(nums, suf[i].op);
 	assert(nums.size() == 1);
-	return ITS_VAR ? *nums[nums.size()-1].var : nums[nums.size()-1].num;
+	return nums[nums.size()-1];
 }
 
 
@@ -342,8 +312,7 @@ VarValue getExpResult(string expr) {
 		}
 		else if (type == VARIABLE_TYPE) {
 			// puts("haha");
-			// suf.push_back(NumOrOp( actRecManager.acquireValue(in.next()) ));
-			suf.push_back(NumOrOp( actRecManager.acquireValuePointer(in.next()) ));
+			suf.push_back(NumOrOp( actRecManager.acquireValue(in.next()) ));
 			// puts("haha");
 		}
 		else if (type == FUNCTION_TYPE) {
