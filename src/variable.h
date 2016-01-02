@@ -46,7 +46,7 @@ class ActRec {
 public:
 	ActRec();
 	int getSize();
-	void addVar(string varName, VarValue val);
+	void addVar(string varName, VarValue val=VarValue());
 	VarValue getValue(string varName);
 	VarValue* getValuePointer(string varName);
 private:
