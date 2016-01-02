@@ -1,7 +1,6 @@
 #include "variable.h"
 #include "calculator.h"
 
-/*
 //variable test
 int main()
 {
@@ -12,11 +11,225 @@ int main()
 
 	varValue testvv1(5);
 	varValue testvv2("hello");
-	varValue testvv3(2.15);
+	varValue testvv3(2.5);
+
+	varValue testvv4(10);
+	varValue testvv5("world");
+	varValue testvv6(7.5);
+
 	varValue receivevv;
 
 	ActRecManager testARM;
 
+	// test var calculation
+	
+	// test +
+
+		// test int + int
+	cout << "TEST INT + INT" << endl;
+	receivevv = testvv1 + testvv4;
+	receivevv.print();
+		// test int + double
+	cout << "TEST INT + DOUBLE" << endl;
+	receivevv = testvv1 + testvv3;
+	receivevv.print();
+		// test int + string
+	cout << "TEST INT + STRING" << endl;
+	receivevv = testvv1 + testvv2;
+	receivevv.print();
+		// test double + int
+	cout << "TEST DOUBLE + INT" << endl;
+	receivevv = testvv3 + testvv4;
+	receivevv.print();
+		// test double + double
+	cout << "TEST DOUBLE + DOUBLE" << endl;
+	receivevv = testvv3 + testvv6;
+	receivevv.print();
+		// test double + string
+	cout << "TEST DOUBLE + STRING" << endl;
+	receivevv = testvv3 + testvv5;
+	receivevv.print();
+		// test string + int
+	cout << "TEST STRING + INT" << endl;
+	receivevv = testvv2 + testvv4;
+	receivevv.print();
+		// test string + double
+	cout << "TEST STRING + DOUBLE" << endl;
+	receivevv = testvv5 + testvv6;
+	receivevv.print();
+		// test string + string
+	cout << "TEST STRING + STRING" << endl;
+	receivevv = testvv2 + testvv5;
+	receivevv.print();
+
+	cout << endl << "------------------------" << endl << endl;
+
+	// test -
+
+		// test int - int
+	cout << "TEST INT - INT" << endl;
+	receivevv = testvv1 - testvv4;
+	receivevv.print();
+		// test int - double
+	cout << "TEST INT - DOUBLE" << endl;
+	receivevv = testvv1 - testvv3;
+	receivevv.print();
+		// test int - string
+	cout << "TEST INT - STRING" << endl;
+	receivevv = testvv1 - testvv2;
+	receivevv.print();
+		// test double - int
+	cout << "TEST DOUBLE - INT" << endl;
+	receivevv = testvv3 - testvv4;
+	receivevv.print();
+		// test double - double
+	cout << "TEST DOUBLE - DOUBLE" << endl;
+	receivevv = testvv3 - testvv6;
+	receivevv.print();
+		// test double - string
+	cout << "TEST DOUBLE - STRING" << endl;
+	receivevv = testvv3 - testvv5;
+	receivevv.print();
+		// test string - int
+	cout << "TEST STRING - INT" << endl;
+	receivevv = testvv2 - testvv4;
+	receivevv.print();
+		// test string - double
+	cout << "TEST STRING - DOUBLE" << endl;
+	receivevv = testvv5 - testvv6;
+	receivevv.print();
+		// test string - string
+	cout << "TEST STRING - STRING" << endl;
+	receivevv = testvv2 - testvv5;
+	receivevv.print();
+
+	cout << endl << "------------------------" << endl << endl;
+
+	// test *
+
+		// test int * int
+	cout << "TEST INT * INT" << endl;
+	receivevv = testvv1 * testvv4;
+	receivevv.print();
+		// test int * double
+	cout << "TEST INT * DOUBLE" << endl;
+	receivevv = testvv1 * testvv3;
+	receivevv.print();
+		// test int * string
+	cout << "TEST INT * STRING" << endl;
+	receivevv = testvv1 * testvv2;
+	receivevv.print();
+		// test double * int
+	cout << "TEST DOUBLE * INT" << endl;
+	receivevv = testvv3 * testvv4;
+	receivevv.print();
+		// test double * double
+	cout << "TEST DOUBLE * DOUBLE" << endl;
+	receivevv = testvv3 * testvv6;
+	receivevv.print();
+		// test double * string
+	cout << "TEST DOUBLE * STRING" << endl;
+	receivevv = testvv3 * testvv5;
+	receivevv.print();
+		// test string * int
+	cout << "TEST STRING * INT" << endl;
+	receivevv = testvv2 * testvv4;
+	receivevv.print();
+		// test string * double
+	cout << "TEST STRING * DOUBLE" << endl;
+	receivevv = testvv5 * testvv6;
+	receivevv.print();
+		// test string * string
+	cout << "TEST STRING * STRING" << endl;
+	receivevv = testvv2 * testvv5;
+	receivevv.print();
+
+	cout << endl << "------------------------" << endl << endl;
+
+	// test /
+
+		// test int / int
+	cout << "TEST INT / INT" << endl;
+	receivevv = testvv1 / testvv4;
+	receivevv.print();
+		// test int / double
+	cout << "TEST INT / DOUBLE" << endl;
+	receivevv = testvv1 / testvv3;
+	receivevv.print();
+		// test int / string
+	cout << "TEST INT / STRING" << endl;
+	receivevv = testvv1 / testvv2;
+	receivevv.print();
+		// test double / int
+	cout << "TEST DOUBLE / INT" << endl;
+	receivevv = testvv3 / testvv4;
+	receivevv.print();
+		// test double / double
+	cout << "TEST DOUBLE / DOUBLE" << endl;
+	receivevv = testvv3 / testvv6;
+	receivevv.print();
+		// test double / string
+	cout << "TEST DOUBLE / STRING" << endl;
+	receivevv = testvv3 / testvv5;
+	receivevv.print();
+		// test string / int
+	cout << "TEST STRING / INT" << endl;
+	receivevv = testvv2 / testvv4;
+	receivevv.print();
+		// test string / double
+	cout << "TEST STRING / DOUBLE" << endl;
+	receivevv = testvv5 / testvv6;
+	receivevv.print();
+		// test string / string
+	cout << "TEST STRING / STRING" << endl;
+	receivevv = testvv2 / testvv5;
+	receivevv.print();
+
+	cout << endl << "------------------------" << endl << endl;
+
+	// test %
+
+		// test int % int
+	cout << "TEST INT \% INT" << endl;
+	receivevv = testvv1 % testvv4;
+	receivevv.print();
+		// test int % double
+	cout << "TEST INT \% DOUBLE" << endl;
+	receivevv = testvv1 % testvv3;
+	receivevv.print();
+		// test int % string
+	cout << "TEST INT \% STRING" << endl;
+	receivevv = testvv1 % testvv2;
+	receivevv.print();
+		// test double / int
+	cout << "TEST DOUBLE \% INT" << endl;
+	receivevv = testvv3 % testvv4;
+	receivevv.print();
+		// test double / double
+	cout << "TEST DOUBLE \% DOUBLE" << endl;
+	receivevv = testvv6 % testvv3;
+	receivevv.print();
+		// test double / string
+	cout << "TEST DOUBLE \% STRING" << endl;
+	receivevv = testvv3 % testvv5;
+	receivevv.print();
+		// test string / int
+	cout << "TEST STRING \% INT" << endl;
+	receivevv = testvv2 % testvv4;
+	receivevv.print();
+		// test string / double
+	cout << "TEST STRING \% DOUBLE" << endl;
+	receivevv = testvv5 % testvv6;
+	receivevv.print();
+		// test string / string
+	cout << "TEST STRING \% STRING" << endl;
+	receivevv = testvv2 % testvv5;
+	receivevv.print();
+
+	cout << endl << "------------------------" << endl << endl;
+
+
+/*
 	// test addVar func, success!
 	testAR1.addVar("testvar", testvv1);
 	testAR1.addVar("testvar2", testvv2);
@@ -94,11 +307,8 @@ int main()
 	testARM.deleteAR();
 	cout << "TEST POP THE ACTIVITY RECORD STACK" << endl;
 	cout << "stack size = " << testARM.getSize() << endl;
-	
-	return 0;
-}
-*/
+*/	
 
-int main() {
-	
+
+	return 0;
 }

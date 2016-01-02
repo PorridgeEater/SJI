@@ -5,22 +5,31 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <sstream>
 
 using namespace std;
 
 class varValue {
 public:
 	varValue();
-	varValue(int);
 	varValue(double);
 	varValue(string);
 	int getValueType();
-	int getIntValue();
+	long long getIntValue();
 	double getDoubleValue();
 	string getStrValue();
+	void print();
+
+	varValue operator+(const varValue&);
+	varValue operator-(const varValue&);
+	varValue operator*(const varValue&);
+	varValue operator/(const varValue&);
+	varValue operator%(const varValue&);
+
 private:
 	int valuetype;			// -1 for undefined, 0 for null, 1 for int, 2 for double, 3 for string
-	double num_value;
+	long long int_value;
+	double double_value;
 	string str_value;
 };
 
