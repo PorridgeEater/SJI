@@ -2,8 +2,10 @@
 /*  
 	TODO:
 		a++;
-		a=a+1;
+		a=a+1;  //??
 		-a;
+
+		删掉分号的判断
 */
 
 
@@ -20,6 +22,6 @@ bool isCharacter(char c);
 bool isOperator(char c);
 double stringToDouble(string s);
 
-varValue getValue(string expr);
+varValue getExpResult(string expr);
 
 #endif

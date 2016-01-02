@@ -3,6 +3,10 @@
 #include <cmath>
 #include "variable.h"
 
+ActRecManager actRecManager;
+
+
+
 // implement varValue
 varValue::varValue() {
 	valuetype = -1;

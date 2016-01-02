@@ -1,9 +1,18 @@
+#include <cassert>
+#include <cstdio>
+#include <cstdlib>
 #include "variable.h"
+#define dbg(x) cout<<#x<<" "<<x<<endl
+
+
+extern ActRecManager actRecManager;
+
 
 
 static const int MIN_INT = 0x80000000;
 
-//  增加一个type，要修改TYPE_MAXNUM、typePair
+//  增加一个operator，要修改isOperator、getPd、cal
+//  增加一个type，要修改TYPE_MAXNUM、typePair、nextType、next
 static const int WRONG_TYPE = -1;
 static const int OPERATOR_TYPE = 0;
 static const int NUMBER_TYPE = 1;
@@ -11,9 +20,10 @@ static const int VARIABLE_TYPE = 2;
 static const int FUNCTION_TYPE = 3;
 static const int LEFT_BRACKET_TYPE = 4;
 static const int RIGHT_BRACKET_TYPE = 5;
+static const int STRING_TYPE = 6;
 //负号的添加
-static const int TYPE_MAXNUM = 6;
-static const varValue UNDEFINED = (varValue){-1, 0.0, ""};
+static const int TYPE_MAXNUM = 7;
+const varValue UNDEFINED;// = (varValue){-1, 0.0, ""};  //??
 
 static const int ITS_NUM = 1;
 static const int ITS_OP = 2;
@@ -26,7 +36,10 @@ bool isCharacter(char c) {
 	return (c>='a'&&c<='z') || (c>='A'&&c<='Z');
 }
 bool isOperator(char c) {
-	return c=='+' || c=='-' || c=='*' || c=='/';
+	return c=='+' || c=='-' || c=='*' || c=='/' || c=='%';
+}
+bool isSpace(char c) {
+	return c==' ' || c=='\t';
 }
 double stringToDouble(string s) {  //只支持十进制，不支持负数
 	double ret = 0.0;
@@ -41,7 +54,9 @@ struct MyStream {
 	MyStream(string expr);
 	bool hasNext();
 	string next();
+	string _next();
 	int nextType();
+	bool hasExtraExp();
 };
 
 struct NumOrOp {
@@ -51,11 +66,16 @@ struct NumOrOp {
 	NumOrOp(varValue a);
 	NumOrOp(char c);
 };
+ostream &operator<<(ostream &out, NumOrOp t) {
+	if (t.type == ITS_NUM) return out<<(t.num).getIntValue()<<endl;
+	return out<<t.op<<endl;
+}
 
 
-MyStream::MyStream(string expr):expr(expr) { p=0; }
+MyStream::MyStream(string expr):expr(expr), p(0) {}
 bool MyStream::hasNext() {
-	return p != expr.size();
+	while (p < expr.size() && expr[p] == ' ') p++;
+	return p != expr.size() && expr[p] != ';';
 }
 string MyStream::next() {
 	string ret = "";
@@ -68,7 +88,24 @@ string MyStream::next() {
 		|| type == RIGHT_BRACKET_TYPE) return ret+=expr[p++];
 
 	if (type == NUMBER_TYPE) {
-		for (; p<expr.size() && isDigit(expr[p]); ret+=expr[p++]);
+		for (; p<expr.size() && (isDigit(expr[p]) || expr[p]=='.'); ret+=expr[p++]);
+		return ret;
+	}
+	if (type == STRING_TYPE) {
+		if (expr[p] == '\"') {  //"..."
+			for (p++; p<expr.size();) {
+				if (expr[p] == '\"' && expr[p-1] != '\\') break;
+				ret += expr[p++];
+			}
+			p++;
+		}
+		else {  //'...'
+			for (p++; p<expr.size();) {
+				if (expr[p] == '\'' && expr[p-1] != '\\') break;
+				ret += expr[p++];
+			}
+			p++;
+		}
 		return ret;
 	}
 
@@ -82,15 +119,40 @@ string MyStream::next() {
 		}
 		return ret;
 	}
+
+	if (type == VARIABLE_TYPE) {
+		for (; p<expr.size() && (isCharacter(expr[p]) || isDigit(expr[p])); ret+=expr[p++]);
+		return ret;
+	}
 }
 int MyStream::nextType() {
 	if (expr[p] == '(') return LEFT_BRACKET_TYPE;
 	if (expr[p] == ')') return RIGHT_BRACKET_TYPE;
 
-	/*  如果这一位是数字，那后面跟的肯定是数字  */
-	if (isDigit(expr[p])) return NUMBER_TYPE;
+	/*  字符串  */
+	if (expr[p] == '\"') {
+		for (int q=p+1; q<expr.size(); q++)
+			if (expr[q] == '\"' && expr[q-1] != '\\') return STRING_TYPE;
+		return WRONG_TYPE;
+	}
+	if (expr[p] == '\'') {
+		for (int q=p+1; q<expr.size(); q++)
+			if (expr[q] == '\'' && expr[q-1] != '\\') return STRING_TYPE;
+		return WRONG_TYPE;
+	}
 
-	/*  如果这一位是操作符，那这就肯定是操作符  */
+	/*  如果这一位是数字，那后面跟的可能是整形或浮点型  */
+	if (isDigit(expr[p])) {
+		int dotNum = 0;
+		for (int q=p+1; q<expr.size(); q++)
+			if (!isDigit(expr[q]))
+				if (expr[q] == '.') dotNum++;
+				else break;
+		if (dotNum > 1) return WRONG_TYPE;
+		return NUMBER_TYPE;
+	}
+
+	/*  如果这一位是操作符，那这就肯定是操作符  */  //非单字符操作符??
 	if (isOperator(expr[p])) return OPERATOR_TYPE;
 
 	/*  如果这一位是字符，那后面跟的可能是函数或变量  */
@@ -105,28 +167,39 @@ int MyStream::nextType() {
 				}
 				return WRONG_TYPE;
 			}
-			else if (isOperator(expr[q])) return VARIABLE_TYPE;
-			else if (!isCharacter(expr[q])) return WRONG_TYPE;
+			else if (isOperator(expr[q]) || isSpace(expr[q]) || expr[q]==')') return VARIABLE_TYPE;
+			else if (!isCharacter(expr[q]) && !isDigit(expr[q])) return WRONG_TYPE;
 		}
 		return VARIABLE_TYPE;
 	}
 	return WRONG_TYPE;
 }
+bool MyStream::hasExtraExp() {
+	while (p < expr.size() && expr[p] == ' ') p++;
+	return p != expr.size();
+}
+string MyStream::_next() {
+	int _p = p;
+	string s = next();
+	p = _p;
+	return s;
+}
 
 
-NumOrOp::NumOrOp(varValue a) { num = a; type = ITS_NUM; }
-NumOrOp::NumOrOp(char c) { op = c; type = ITS_OP; }
+NumOrOp::NumOrOp(varValue a):num(a), type(ITS_NUM) {}
+NumOrOp::NumOrOp(char c):op(c), type(ITS_OP), num(UNDEFINED) {}
 
 
 
 
 static bool typePair[TYPE_MAXNUM][TYPE_MAXNUM] = {  //typePair[preType][type]
-	0, 1, 1, 1, 1, 0,
-	1, 0, 0, 0, 0, 1,
-	1, 0, 0, 0, 0, 1,
-	1, 0, 0, 0, 0, 1,
-	0, 1, 1, 1, 1, 1,
-	1, 0, 0, 0, 0, 1,
+	0, 1, 1, 1, 1, 0, 1,
+	1, 0, 0, 0, 0, 1, 0,
+	1, 0, 0, 0, 0, 1, 0,
+	1, 0, 0, 0, 0, 1, 0,
+	0, 1, 1, 1, 1, 1, 1,
+	1, 0, 0, 0, 0, 1, 0,
+	1, 0, 0, 0, 0, 1, 0,
 };
 //TODO [FUNCTION_TYPE][LEFT_BRACKET_TYPE]可能需要加上特判
 //TODO [...][LEFT_BRACKET_TYPE]可能需要加上特判
@@ -149,37 +222,40 @@ static int cmpOp(char c1, char c2) {
 	return getPd(c1) - getPd(c2);
 }
 
-void cal(vector<varValue> &nums, char c) {
-	switch (c) {
-	case '+':
-		//..
-		break;
-	case '-':
-		break;
-	case '*':
-		break;
-	case '/':
-		break;
-	default:
-		break;
+void cal(vector<varValue> &nums, char ch) {
+	varValue b = nums[nums.size()-1]; nums.pop_back();
+	varValue a = nums[nums.size()-1]; nums.pop_back();
+	// a.print(); cout<<a.getStrValue().size()<<endl; cout<<ch<<endl; b.print(); cout<<b.getStrValue().size()<<endl; cout<<endl;
+	varValue c;
+	switch (ch) {
+	case '+': c=a+b; break;
+	case '-': c=a-b; break;
+	case '*': c=a*b; break;
+	case '/': c=a/b; break;
+	case '%': c=a%b; break;
+	default: break;
 	}
+	nums.push_back(c);
+	// c.print(); cout<<c.getStrValue().size()<<endl; cout<<endl<<endl;
 }
 static varValue calSuffix(const vector<NumOrOp> &suf) {
 	vector<varValue> nums;
 	for (int i=0; i<suf.size(); i++)
 		if (suf[i].type == ITS_NUM) nums.push_back(suf[i].num);
 		else cal(nums, suf[i].op);
-	return nums[nums.size()-1];  //??
+	assert(nums.size() == 1);
+	return nums[nums.size()-1];
 }
 
 
 /*  用于获取表达式值的函数。若表达式有错会返回UNDEFINED。(没有处理空格)  */
-varValue getValue(string expr) {
+varValue getExpResult(string expr) {
 	// if (expr.size() == 0) {
 	// 	ret.valuetype = -1;
 	// 	return ret;
 	// }
-	if (expr.size() == 0) return UNDEFINED;
+
+	if (expr.size() == 0) return UNDEFINED;  //表达式为空
 	vector<NumOrOp> suf;
 	vector<char> ops;
 
@@ -187,9 +263,10 @@ varValue getValue(string expr) {
 	int preType = MIN_INT;
 	while (in.hasNext()) {
 		int type = in.nextType();
-		if (!isValid(preType, type)) return UNDEFINED;
+		// cout<<"type="<<type<<" | "<<in._next()<<endl;
+		if (!isValid(preType, type)) return UNDEFINED;  //表达式有问题
 
-		if (type == OPERATOR_TYPE) {
+		if (type == OPERATOR_TYPE || type == LEFT_BRACKET_TYPE || type == RIGHT_BRACKET_TYPE) {
 			char c = in.next()[0];
 			if (ops.size() == 0 || c == '(') ops.push_back(c);
 			else {
@@ -210,25 +287,50 @@ varValue getValue(string expr) {
 			}
 		}
 		else if (type == NUMBER_TYPE) {
-			suf.push_back(NumOrOp( varValue(stringToDouble(in.next())) ));
+			string s = in.next();
+			if (s.find('.') != string::npos) {  //double
+				double num = atof(s.c_str());
+				suf.push_back(NumOrOp( varValue(num) ));
+			}
+			else {  //int
+				int num = atoi(s.c_str());
+				suf.push_back(NumOrOp( varValue(num) ));
+			}
+		}
+		else if (type == STRING_TYPE) {
+			suf.push_back(NumOrOp( varValue(in.next()) ));
 		}
 		else if (type == VARIABLE_TYPE) {
-			suf.push_back(NumOrOp( ActRecManager.acquireValue(in.next()) ));
+			// puts("haha");
+			string s = in.next();
+			// cout<<s<<" "<<s.size()<<endl;
+			// cout<<actRecManager.top().getSize()<<endl;
+			suf.push_back(NumOrOp( actRecManager.acquireValue(s) ));
+			// puts("haha");
 		}
 		else if (type == FUNCTION_TYPE) {
+			//TODO 异常处理
+			//callFunction();
+
 			//要加上f(1)[2]之类情况的判断??
 			//suf.push_back(NumOrOp(  ));
 		}
-		else if (type == LEFT_BRACKET_TYPE) {
-			suf.push_back(NumOrOp( getValue(in.next()) ));
-		}
-		else if (type == RIGHT_BRACKET_TYPE) {
-			return UNDEFINED;
-		}
-		else {
+		// else if (type == LEFT_BRACKET_TYPE) {
+		// 	suf.push_back(NumOrOp( getExpResult(in.next()) ));
+		// }
+		// else if (type == RIGHT_BRACKET_TYPE) {  /*  前面没有左括号却有了右括号，错误  */
+		// 	return UNDEFINED;
+		// }
+		else {  /*  未知错误  */
+			puts("Unknown error.");
 			return UNDEFINED;
 		}
 	}
+	// puts("Ready to cal");
+	if (in.hasExtraExp()) return puts("Extra expression."), UNDEFINED;  /*  分号后面还有表达式，错误  */
+
+	// puts("Start to cal");
+
 	while (ops.size()) suf.push_back(NumOrOp( ops[ops.size()-1] )), ops.pop_back();
 	return calSuffix(suf);
 }
