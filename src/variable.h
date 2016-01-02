@@ -6,6 +6,7 @@
 #include <string>
 #include <iostream>
 #include <sstream>
+#include <stdio.h>
 
 #define INT_TYPE 1
 #define DOUBLE_TYPE 2
@@ -27,6 +28,7 @@ public:
 	string getStrValue();
 	void print();
 	bool toBool();
+	string toString();
 
 	VarValue operator+(const VarValue&);
 	VarValue operator-(const VarValue&);

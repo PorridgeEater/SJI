@@ -5,8 +5,6 @@
 
 ActRecManager actRecManager;
 
-
-
 // implement VarValue
 VarValue::VarValue() {
 	valuetype = -1;
@@ -52,6 +50,27 @@ bool VarValue::toBool(){
 		return double_value!=0;
 	if (valuetype == STRING_TYPE)
 		return str_value.length()!=0;
+}
+
+string VarValue::toString(){
+	if (valuetype == UNDEFINED_TYPE)
+		return "undefined";
+	if (valuetype == NULL_TYPE)
+		return "null";
+	if (valuetype == INT_TYPE){
+		char tmp[100];
+		sprintf(tmp,"%lld",int_value);
+		return tmp;
+	}
+	if (valuetype == DOUBLE_TYPE){
+		string tmp;
+		stringstream ss;
+		ss<<double_value;
+		ss>>tmp;
+		return tmp;
+	}
+	if (valuetype == STRING_TYPE)
+		return str_value;
 }
 
 void VarValue::print() {
