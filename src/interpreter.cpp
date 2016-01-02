@@ -130,13 +130,14 @@ static void forStatement(string condition, string content) {
     cout << "iter:" << iter << endl;
     
     interpreter(init);
-    VarValue result = getExpResult(condition);
+    cout << condition << endl;
+    VarValue result = getExpResult(cond);
     while (result.toBool()) {
         actRecManager.insertAR(ActRec());
         interpreter(content);
         interpreter(iter);
         actRecManager.deleteAR();
-        result = getExpResult(condition);
+        result = getExpResult(cond);
     }
     
     actRecManager.deleteAR();

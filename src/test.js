@@ -1,6 +1,7 @@
 var a = 0 ;
 var b = 1 ;
 var c = 2 ;
+d = 1;
 
 function add(a, b)
 {
@@ -33,4 +34,5 @@ print b;
 print c;
 print n;
 print i;
+print d;
 print add(a,b);
