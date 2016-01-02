@@ -339,7 +339,9 @@ int main() {
 	actRecManager.insertAR(testAR1);
 
 
-	getExpResult("  testvar + (\' \' + testvar2)  ").print();
+	getExpResult("  testvar + (\' \' + testvar2) + \' \' + (1/2*6%2 + testvar3)  ").print();
+
+	getExpResult(" 0.0 ").print();
 
 	//TODO  函数的测试
 	return 0;

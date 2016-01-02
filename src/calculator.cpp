@@ -302,10 +302,7 @@ varValue getExpResult(string expr) {
 		}
 		else if (type == VARIABLE_TYPE) {
 			// puts("haha");
-			string s = in.next();
-			// cout<<s<<" "<<s.size()<<endl;
-			// cout<<actRecManager.top().getSize()<<endl;
-			suf.push_back(NumOrOp( actRecManager.acquireValue(s) ));
+			suf.push_back(NumOrOp( actRecManager.acquireValue(in.next()) ));
 			// puts("haha");
 		}
 		else if (type == FUNCTION_TYPE) {
