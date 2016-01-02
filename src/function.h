@@ -61,7 +61,7 @@ void splitArgList(const string &argList,vector<string> &v){
 	string s(tmp);
 	for (int i=0,last=-1,l=s.length();i<=l;i++){
 		if (i==l || s[i]==','){
-			if (i<=last+1) throw Exception();
+			if (i<=last+1) throw Exception("Arguments are wrong.");
 			v.push_back(s.substr(last+1,i-last-1));
 			last=i;
 		}
@@ -78,7 +78,7 @@ void defineFunction(const string name, const string argList, const string conten
 
 VarValue callFunction(const string name, const string argList){
 	Function func;
-	if (!funcList.get(name,func)) throw Exception();
+	if (!funcList.get(name,func)) throw Exception("No such a function.");
 	func.print();
 	ActRec ar;
 	vector<string> arg;

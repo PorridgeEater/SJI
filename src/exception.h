@@ -2,9 +2,13 @@
 #define __EXCEPTION_H__
 
 class Exception{
+	string msg;
 public:
+	Exception(const string &s){
+		msg=s;
+	}
 	void errMessage(){
-		cout<<"There is a error!!!"<<endl;
+		cout<<"Error : "<<msg<<endl;
 	}
 };
 
