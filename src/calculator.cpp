@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include "variable.h"
 #include "function.h"
+#include "calculator.h"
 #define dbg(x) cout<<#x<<" "<<x<<endl
 
 

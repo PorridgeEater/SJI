@@ -1,32 +1,29 @@
 var a = 0 ;
-var b = 0 ;
+var b = 1 ;
+var c = 2 ;
 
-function test()
+function add(int a, int b)
 {
-	a = 1.0 ;
-	return a ;
+	return a + b;
 }
 
-if ( a > 0 ) {
-	b = 1 ;	
+if ( add(a,b) > 0 ) {
+	c = 1;	
 }
-else if (b>0) {
+else {
 	a = 1;
 }
-
-var array = new Array() ;
 
 var n = 10 ;
 
 for ( var i = 0 ; i < n ; i = i+1 )
 {
-	array = i ;
+	c++
 }
 
 while (n) {
-	print array[i] + " ";
+	print n;
+	n = n - 1;
 }
-
-test(1,2);
 
 a = b;
