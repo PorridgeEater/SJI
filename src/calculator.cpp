@@ -114,8 +114,8 @@ string MyStream::next() {
 	if (type == FUNCTION_TYPE) {
 		int tmp = 0;  bool flag = 0;
 		for (; p<expr.size(); ) {
-			if (expr[p] == '(') flag = 1, tmp++, ret+=" ";
-			else if (expr[p] == ')') tmp--;
+			if (expr[p] == '(') flag = 1, tmp++, ret+=" ", p++;
+			else if (expr[p] == ')') tmp--, p++;
 			else ret+=expr[p++];
 			if (flag && tmp == 0) break;
 		}
@@ -261,7 +261,8 @@ VarValue getExpResult(string expr) {
 	// 	return ret;
 	// }
 
-	cout<<expr<<endl;
+	// puts("!!!!!!!!!!!!!");
+	// cout<<expr<<endl;
 
 	if (expr.size() == 0) return UNDEFINED;  //表达式为空
 	vector<NumOrOp> suf;
@@ -271,6 +272,7 @@ VarValue getExpResult(string expr) {
 	int preType = MIN_INT;
 	while (in.hasNext()) {
 		int type = in.nextType();
+		// cout<<"haha"<<endl;
 		// cout<<"type="<<type<<" | "<<in._next()<<endl;
 		if (!isValid(preType, type)) return UNDEFINED;  //表达式有问题
 
@@ -318,6 +320,7 @@ VarValue getExpResult(string expr) {
 
 			//要加上f(1)[2]之类情况的判断??
 			string s = in.next();
+			// cout<<s<<endl;
 			int d = s.find(" ");
 			string name = s.substr(0, d), arglist = s.substr(d, s.size()-d);
 			suf.push_back(NumOrOp( callFunction(name, arglist) ));
@@ -339,5 +342,7 @@ VarValue getExpResult(string expr) {
 	// puts("Start to cal");
 
 	while (ops.size()) suf.push_back(NumOrOp( ops[ops.size()-1] )), ops.pop_back();
+	// suf[0].num.print();
+	// calSuffix(suf).print();
 	return calSuffix(suf);
 }
