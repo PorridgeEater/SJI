@@ -57,7 +57,7 @@ public:
 	int getSize();
 	void insertAR(ActRec ar);
 	bool deleteAR();
-	void addVar(string varName, VarValue val);
+	void addVar(string varName, VarValue val=VarValue());
 	VarValue acquireValue(string varName);
 	ActRec& top();	// pay attention to copy construct
 private:
