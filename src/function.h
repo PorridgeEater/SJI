@@ -7,7 +7,7 @@
 
 using namespace std;
 
-//extern VarValue interpreter(string content, ActRec ar);
+extern VarValue interpreter(string content);
 
 class Function{
 public:
@@ -95,7 +95,8 @@ VarValue callFunction(const string name, const string argList){
 			ar.addVar(tmpName,var);
 		}
 	}
-	//return interpreter(func.content,ar);
-	return VarValue();
+	VarValue ret = interpreter(func.content);
+	actRecManager.insertAR(ar);
+	return ret;
 	//需要interperter接受到ar之后做一个ARstack.push(ar)的操作
 }
