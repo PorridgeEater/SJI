@@ -67,6 +67,8 @@ VarValue callFunction(const string name, const string argList){
 	vector<string> arg;
 	splitArgList(argList,arg);
 	VarValue var;
+	for (int i=0;i<func.arg.size();i++)
+		ar.addVar(func.arg[i]);
 	for (int i=0;i<arg.size();i++){
 		if (i<func.arg.size()){
 			var=actRecManager.acquireValue(arg[i]);
