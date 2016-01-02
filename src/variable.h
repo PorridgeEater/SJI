@@ -7,6 +7,13 @@
 #include <iostream>
 #include <sstream>
 
+#define INT_TYPE 1
+#define DOUBLE_TYPE 2
+#define STRING_TYPE 3
+#define UNDEFINED_TYPE -1
+#define NULL_TYPE 0
+
+
 using namespace std;
 
 class VarValue {
@@ -19,6 +26,7 @@ public:
 	double getDoubleValue();
 	string getStrValue();
 	void print();
+	bool toBool();
 
 	VarValue operator+(const VarValue&);
 	VarValue operator-(const VarValue&);

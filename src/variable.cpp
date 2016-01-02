@@ -43,13 +43,24 @@ string VarValue::getStrValue() {
 	return str_value;
 }
 
+bool VarValue::toBool(){
+	if (valuetype == UNDEFINED_TYPE || valuetype == NULL_TYPE)
+		return false;
+	if (valuetype == INT_TYPE)
+		return int_value!=0;
+	if (valuetype == DOUBLE_TYPE)
+		return double_value!=0;
+	if (valuetype == STRING_TYPE)
+		return str_value.length()!=0;
+}
+
 void VarValue::print() {
 	cout << "valuetype = " << valuetype << "\t";
-	if (valuetype == 1)
+	if (valuetype == INT_TYPE)
 		cout << "int value = " << int_value << endl;
-	else if (valuetype == 2)
+	else if (valuetype == DOUBLE_TYPE)
 		cout << "double value = " << double_value << endl;
-	else if (valuetype == 3)
+	else if (valuetype == STRING_TYPE)
 		cout << "string value = " << str_value << endl;
 	else
 		cout << "undefined or error" << endl;
