@@ -178,6 +178,10 @@ int MyStream::nextType() {
 }
 bool MyStream::hasExtraExp() {
 	while (p < expr.size() && expr[p] == ' ') p++;
+	if (p < expr.size() && expr[p] == ';') {
+		p++;
+		while (p < expr.size() && expr[p] == ' ') p++;
+	}
 	return p != expr.size();
 }
 string MyStream::_next() {
@@ -256,6 +260,8 @@ VarValue getExpResult(string expr) {
 	// 	ret.valuetype = -1;
 	// 	return ret;
 	// }
+
+	cout<<expr<<endl;
 
 	if (expr.size() == 0) return UNDEFINED;  //表达式为空
 	vector<NumOrOp> suf;
