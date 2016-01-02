@@ -14,7 +14,7 @@ int main()
 	varValue testvv3(2.5);
 
 	varValue testvv4(10);
-	varValue testvv5("world");
+	varValue testvv5(" world");
 	varValue testvv6(7.5);
 
 	varValue receivevv;
@@ -228,6 +228,7 @@ int main()
 
 	cout << endl << "------------------------" << endl << endl;
 
+	(varValue("abc") + varValue(" ") + varValue("b")).print();
 
 /*
 	// test addVar func, success!

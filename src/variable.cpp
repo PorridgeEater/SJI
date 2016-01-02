@@ -40,7 +40,7 @@ string varValue::getStrValue() {
 }
 
 void varValue::print() {
-	cout << "valuetype = " << valuetype << endl;
+	cout << "valuetype = " << valuetype << "\t";
 	if (valuetype == 1)
 		cout << "int value = " << int_value << endl;
 	else if (valuetype == 2)
@@ -96,7 +96,7 @@ varValue varValue::operator+(const varValue& x) {
 				ss << x.double_value;
 				break;
 			case 3:
-				ss << x.str_value;
+				return varValue(this->str_value + x.str_value);
 				break;
 			default:
 				break;
