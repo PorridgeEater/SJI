@@ -198,19 +198,28 @@ VarValue interpreter(string code)
         }
         else if (e == "var") {
             string name = getKey(code, pos);
-            while (pos < code.length() && code[pos++] != '=') {}
-            string exp = "";
-            while (pos < code.length() && code[pos] != ';') {
-                exp += code[pos++];
+            while (pos < code.length() && code[pos] == ' ') {
+                pos++;
             }
-            if (pos >= code.length()) {
-                cout << "Syntax Error after 'var'" << endl;
-                break;
+            if (code[pos] == ';') {
+                actRecManager.addVar(name);
+                pos++;
             }
-            pos++;
-            cout << "Name: " << name << endl;
-            cout << "Expression: " << exp << endl;
-            actRecManager.addVar(name, getExpResult(exp));
+            else {
+                while (pos < code.length() && code[pos++] != '=') {}
+                string exp = "";
+                while (pos < code.length() && code[pos] != ';') {
+                    exp += code[pos++];
+                }
+                if (pos >= code.length()) {
+                    cout << "Syntax Error after 'var'" << endl;
+                    break;
+                }
+                pos++;
+                cout << "Name: " << name << endl;
+                cout << "Expression: " << exp << endl;
+                actRecManager.addVar(name, getExpResult(exp));
+            }
         }
         else if (e == "function") {
             string name = getKey(code, pos);

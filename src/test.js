@@ -2,6 +2,7 @@ var a = 0 ;
 var b = 1 ;
 var c = 2 ;
 d = 1;
+var e;
 
 function add(a, b)
 {
@@ -28,11 +29,13 @@ while (n) {
 }
 
 a = b;
+e = add(b, c);
 
 print a;
 print b;
 print c;
 print n;
+print e;
 print i;
 print d;
 print add(a,b);
