@@ -73,9 +73,9 @@ static string getKey(string code, int &p)
 
 static void ifStatement(string condition, string content, string others) {
     // cout << condition << " " << content << endl;
+    actRecManager.insertAR(ActRec());
     VarValue result = getExpResult(condition);
     cout << "!" << endl;
-    actRecManager.insertAR(ActRec());
     if (result.toBool()) {
         interpreter(content);
     }
@@ -86,6 +86,7 @@ static void ifStatement(string condition, string content, string others) {
 }
 
 static void whileStatement(string condition, string content) {
+    actRecManager.insertAR(ActRec());
     VarValue result = getExpResult(condition);
     while (result.toBool()) {
         actRecManager.insertAR(ActRec());
@@ -93,6 +94,7 @@ static void whileStatement(string condition, string content) {
         actRecManager.deleteAR();
         result = getExpResult(condition);
     }
+    actRecManager.deleteAR();
 }
 
 static void forStatement(string condition, string content) {
@@ -261,8 +263,13 @@ VarValue interpreter(string code)
                     break;
                 }
                 pos++;
+                //cout << e << " " << endl;
+                //cout << actRecManager.acquireValue(e).toString() << endl;
                 cout << "Expression: " << exp << endl;
+                cout << "Result:" << getExpResult(exp).toString() << endl;
                 actRecManager.addVar(e, getExpResult(exp));
+                //cout << actRecManager.acquireValue(e).toString() << endl;
+                //cout << getExpResult(exp).toString() << endl;
             }
             else {
                 cout << "Syntax Error!4" << endl;
