@@ -113,7 +113,7 @@ static void forStatement(string condition, string content) {
     
     int q = p;
     while (p < condition.length() && condition[p++] != ';') {}
-    string cond = condition.substr(q, p-q-1);
+    string cond = condition.substr(q, p-q-2);
     
     if (p >= condition.length()) {
         cout << "Syntax Error in for statement!" << endl;
@@ -205,7 +205,7 @@ VarValue interpreter(string code)
                 cout << "Syntax Error after 'var'" << endl;
                 break;
             }
-            exp += code[pos++];
+            pos++;
             cout << "Name: " << name << endl;
             cout << "Expression: " << exp << endl;
             actRecManager.addVar(name, getExpResult(exp));
@@ -224,7 +224,7 @@ VarValue interpreter(string code)
             while (pos < code.length() && code[pos] != ';') {
                 exp += code[pos++];
             }
-            exp += code[pos++];
+            pos++;
             cout << "exp: " << exp << endl;
             VarValue result = getExpResult(exp);
             cout << result.toString();
@@ -234,7 +234,7 @@ VarValue interpreter(string code)
             while (pos < code.length() && code[pos] != ';') {
                 exp += code[pos++];
             }
-            exp += code[pos++];
+            pos++;
             return getExpResult(exp);
         }
         else {
@@ -260,7 +260,7 @@ VarValue interpreter(string code)
                     cout << "Syntax Error!" << endl;
                     break;
                 }
-                exp += code[pos++];
+                pos++;
                 cout << "Expression: " << exp << endl;
                 actRecManager.addVar(e, getExpResult(exp));
             }

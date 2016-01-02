@@ -7,7 +7,7 @@ function add(int a, int b)
 	return a + b;
 }
 
-if ( add(a,b) > 0 ) {
+if ( add(a,b)) {
 	c = 1;	
 }
 else {
