@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include "variable.h"
+#include "function.h"
 #define dbg(x) cout<<#x<<" "<<x<<endl
 
 
@@ -20,10 +21,10 @@ static const int VARIABLE_TYPE = 2;
 static const int FUNCTION_TYPE = 3;
 static const int LEFT_BRACKET_TYPE = 4;
 static const int RIGHT_BRACKET_TYPE = 5;
-static const int STRING_TYPE = 6;
+static const int STRING_TYPE2 = 6;
 //负号的添加
 static const int TYPE_MAXNUM = 7;
-const varValue UNDEFINED;// = (varValue){-1, 0.0, ""};  //??
+const VarValue UNDEFINED;// = (VarValue){-1, 0.0, ""};  //??
 
 static const int ITS_NUM = 1;
 static const int ITS_OP = 2;
@@ -61,9 +62,9 @@ struct MyStream {
 
 struct NumOrOp {
 	int type;
-	varValue num;
+	VarValue num;
 	char op;
-	NumOrOp(varValue a);
+	NumOrOp(VarValue a);
 	NumOrOp(char c);
 };
 ostream &operator<<(ostream &out, NumOrOp t) {
@@ -91,7 +92,7 @@ string MyStream::next() {
 		for (; p<expr.size() && (isDigit(expr[p]) || expr[p]=='.'); ret+=expr[p++]);
 		return ret;
 	}
-	if (type == STRING_TYPE) {
+	if (type == STRING_TYPE2) {
 		if (expr[p] == '\"') {  //"..."
 			for (p++; p<expr.size();) {
 				if (expr[p] == '\"' && expr[p-1] != '\\') break;
@@ -112,9 +113,9 @@ string MyStream::next() {
 	if (type == FUNCTION_TYPE) {
 		int tmp = 0;  bool flag = 0;
 		for (; p<expr.size(); ) {
-			if (expr[p] == '(') flag = 1, tmp++;
-			if (expr[p] == ')') tmp--;
-			ret+=expr[p++];
+			if (expr[p] == '(') flag = 1, tmp++, ret+=" ";
+			else if (expr[p] == ')') tmp--;
+			else ret+=expr[p++];
 			if (flag && tmp == 0) break;
 		}
 		return ret;
@@ -132,12 +133,12 @@ int MyStream::nextType() {
 	/*  字符串  */
 	if (expr[p] == '\"') {
 		for (int q=p+1; q<expr.size(); q++)
-			if (expr[q] == '\"' && expr[q-1] != '\\') return STRING_TYPE;
+			if (expr[q] == '\"' && expr[q-1] != '\\') return STRING_TYPE2;
 		return WRONG_TYPE;
 	}
 	if (expr[p] == '\'') {
 		for (int q=p+1; q<expr.size(); q++)
-			if (expr[q] == '\'' && expr[q-1] != '\\') return STRING_TYPE;
+			if (expr[q] == '\'' && expr[q-1] != '\\') return STRING_TYPE2;
 		return WRONG_TYPE;
 	}
 
@@ -186,7 +187,7 @@ string MyStream::_next() {
 }
 
 
-NumOrOp::NumOrOp(varValue a):num(a), type(ITS_NUM) {}
+NumOrOp::NumOrOp(VarValue a):num(a), type(ITS_NUM) {}
 NumOrOp::NumOrOp(char c):op(c), type(ITS_OP), num(UNDEFINED) {}
 
 
@@ -222,11 +223,11 @@ static int cmpOp(char c1, char c2) {
 	return getPd(c1) - getPd(c2);
 }
 
-void cal(vector<varValue> &nums, char ch) {
-	varValue b = nums[nums.size()-1]; nums.pop_back();
-	varValue a = nums[nums.size()-1]; nums.pop_back();
+void cal(vector<VarValue> &nums, char ch) {
+	VarValue b = nums[nums.size()-1]; nums.pop_back();
+	VarValue a = nums[nums.size()-1]; nums.pop_back();
 	// a.print(); cout<<a.getStrValue().size()<<endl; cout<<ch<<endl; b.print(); cout<<b.getStrValue().size()<<endl; cout<<endl;
-	varValue c;
+	VarValue c;
 	switch (ch) {
 	case '+': c=a+b; break;
 	case '-': c=a-b; break;
@@ -238,8 +239,8 @@ void cal(vector<varValue> &nums, char ch) {
 	nums.push_back(c);
 	// c.print(); cout<<c.getStrValue().size()<<endl; cout<<endl<<endl;
 }
-static varValue calSuffix(const vector<NumOrOp> &suf) {
-	vector<varValue> nums;
+static VarValue calSuffix(const vector<NumOrOp> &suf) {
+	vector<VarValue> nums;
 	for (int i=0; i<suf.size(); i++)
 		if (suf[i].type == ITS_NUM) nums.push_back(suf[i].num);
 		else cal(nums, suf[i].op);
@@ -249,7 +250,7 @@ static varValue calSuffix(const vector<NumOrOp> &suf) {
 
 
 /*  用于获取表达式值的函数。若表达式有错会返回UNDEFINED。(没有处理空格)  */
-varValue getExpResult(string expr) {
+VarValue getExpResult(string expr) {
 	// if (expr.size() == 0) {
 	// 	ret.valuetype = -1;
 	// 	return ret;
@@ -290,15 +291,15 @@ varValue getExpResult(string expr) {
 			string s = in.next();
 			if (s.find('.') != string::npos) {  //double
 				double num = atof(s.c_str());
-				suf.push_back(NumOrOp( varValue(num) ));
+				suf.push_back(NumOrOp( VarValue(num) ));
 			}
 			else {  //int
 				int num = atoi(s.c_str());
-				suf.push_back(NumOrOp( varValue(num) ));
+				suf.push_back(NumOrOp( VarValue(num) ));
 			}
 		}
-		else if (type == STRING_TYPE) {
-			suf.push_back(NumOrOp( varValue(in.next()) ));
+		else if (type == STRING_TYPE2) {
+			suf.push_back(NumOrOp( VarValue(in.next()) ));
 		}
 		else if (type == VARIABLE_TYPE) {
 			// puts("haha");
@@ -307,10 +308,12 @@ varValue getExpResult(string expr) {
 		}
 		else if (type == FUNCTION_TYPE) {
 			//TODO 异常处理
-			//callFunction();
 
 			//要加上f(1)[2]之类情况的判断??
-			//suf.push_back(NumOrOp(  ));
+			string s = in.next();
+			int d = s.find(" ");
+			string name = s.substr(0, d), arglist = s.substr(d, s.size()-d);
+			suf.push_back(NumOrOp( callFunction(name, arglist) ));
 		}
 		// else if (type == LEFT_BRACKET_TYPE) {
 		// 	suf.push_back(NumOrOp( getExpResult(in.next()) ));

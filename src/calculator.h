@@ -23,6 +23,6 @@ bool isCharacter(char c);
 bool isOperator(char c);
 double stringToDouble(string s);
 
-varValue getExpResult(string expr);
+VarValue getExpResult(string expr);
 
 #endif

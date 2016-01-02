@@ -1,5 +1,6 @@
 #include "variable.h"
 #include "calculator.h"
+#include "function.h"
 
 // //variable test
 // int main()
@@ -9,15 +10,15 @@
 // 	ActRec testAR2;
 // 	ActRec testAR3;
 
-// 	varValue testvv1(5);
-// 	varValue testvv2("hello");
-// 	varValue testvv3(2.5);
+// 	VarValue testvv1(5);
+// 	VarValue testvv2("hello");
+// 	VarValue testvv3(2.5);
 
-// 	varValue testvv4(10);
-// 	varValue testvv5(" world");
-// 	varValue testvv6(7.5);
+// 	VarValue testvv4(10);
+// 	VarValue testvv5(" world");
+// 	VarValue testvv6(7.5);
 
-// 	varValue receivevv;
+// 	VarValue receivevv;
 
 // 	ActRecManager testARM;
 
@@ -228,7 +229,7 @@
 
 // 	cout << endl << "------------------------" << endl << endl;
 
-// 	(varValue("abc") + varValue(" ") + varValue("b")).print();
+// 	(VarValue("abc") + VarValue(" ") + VarValue("b")).print();
 
 // /*
 // 	// test addVar func, success!
@@ -322,26 +323,26 @@ int main() {
 	//getExpResult("20*(10/3+1)%79").print();
 
 	// getExpResult("\"haha\" + \" \" + \'c\' + \" \" + 123").print();
-	//(varValue("1234") + varValue("aaa bbb ccc") + varValue("a")).print();
+	//(VarValue("1234") + VarValue("aaa bbb ccc") + VarValue("a")).print();
 
 
 	/*  变量的测试  */
-	varValue testvv1(5);
-	varValue testvv2("hello");
-	varValue testvv3(2.5);
-	ActRec testAR1;
-	testAR1.addVar("testvar", testvv1);
-	testAR1.addVar("testvar2", testvv2);
-	testAR1.addVar("testvar3", testvv3);
-	// cout << "TEST ADDVAR" << endl;
-	// cout << "AR1's size = " << testAR1.getSize() << endl;
-	// cout << endl;
-	actRecManager.insertAR(testAR1);
+	// VarValue testvv1(5);
+	// VarValue testvv2("hello");
+	// VarValue testvv3(2.5);
+	// ActRec testAR1;
+	// testAR1.addVar("testvar", testvv1);
+	// testAR1.addVar("testvar2", testvv2);
+	// testAR1.addVar("testvar3", testvv3);
+	// // cout << "TEST ADDVAR" << endl;
+	// // cout << "AR1's size = " << testAR1.getSize() << endl;
+	// // cout << endl;
+	// actRecManager.insertAR(testAR1);
 
 
-	getExpResult("  testvar + (\' \' + testvar2) + \' \' + (1/2*6%2 + testvar3)  ").print();
+	// getExpResult("  testvar + (\' \' + testvar2) + \' \' + (1/2*6%2 + testvar3)  ").print();
 
-	getExpResult(" 0.0 ").print();
+	// getExpResult(" 0.0 ").print();
 
 	//TODO  函数的测试
 	return 0;
