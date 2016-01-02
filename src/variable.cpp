@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include "variable.h"
+#include "exception.h"
 
 ActRecManager actRecManager;
 
@@ -256,10 +257,9 @@ void ActRec::addVar(string varName, VarValue val) {
 }
 
 VarValue ActRec::getValue(string varName) {
-	VarValue tmp;
 	if (mapVar.count(varName))
-		tmp = mapVar[varName];
-	return tmp;
+		return mapVar[varName];
+	else throw Exception("No such a variable in this scope.");
 }
 
 // implement ActRecManager
@@ -284,10 +284,12 @@ void ActRecManager::addVar(string varName, VarValue val) {
 	int size = getSize();
 	VarValue resValue;
 	while (size--) {
-		resValue = vecActRec[size].getValue(varName);
-		if (resValue.getValueType() != -1){
+		try{
+			resValue = vecActRec[size].getValue(varName);
 			vecActRec[size].addVar(varName, val);
 			return;
+		} catch (Exception e) {
+			continue;
 		}
 	}
 	top().addVar(varName, val);	
@@ -297,11 +299,14 @@ VarValue ActRecManager::acquireValue(string varName) {
 	int size = getSize();
 	VarValue resValue;
 	while (size--) {
-		resValue = vecActRec[size].getValue(varName);
-		if (resValue.getValueType() != -1)
-			break;
+		try{
+			resValue = vecActRec[size].getValue(varName);
+			return resValue;
+		} catch (Exception e) {
+			continue;
+		}
 	}
-	return resValue;
+	throw Exception("No such a variable \""+varName+"\".");
 }
 
 ActRec& ActRecManager::top() {

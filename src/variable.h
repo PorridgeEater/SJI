@@ -14,7 +14,6 @@
 #define UNDEFINED_TYPE -1
 #define NULL_TYPE 0
 
-
 using namespace std;
 
 class VarValue {
