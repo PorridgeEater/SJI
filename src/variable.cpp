@@ -7,12 +7,12 @@ ActRecManager actRecManager;
 
 
 
-// implement varValue
-varValue::varValue() {
+// implement VarValue
+VarValue::VarValue() {
 	valuetype = -1;
 }
 
-varValue::varValue(double x) {
+VarValue::VarValue(double x) {
 	if (abs(x-(int)x) < eps) {
 		valuetype = 1;
 		int_value = (long long)x;
@@ -22,28 +22,28 @@ varValue::varValue(double x) {
 	}
 }
 
-varValue::varValue(string x) {
+VarValue::VarValue(string x) {
 	valuetype = 3;
 	str_value = x;
 }
 
-int varValue::getValueType() {
+int VarValue::getValueType() {
 	return valuetype;
 }
 
-long long varValue::getIntValue() {
+long long VarValue::getIntValue() {
 	return int_value;
 }
 
-double varValue::getDoubleValue() {
+double VarValue::getDoubleValue() {
 	return double_value;
 }
 
-string varValue::getStrValue() {
+string VarValue::getStrValue() {
 	return str_value;
 }
 
-void varValue::print() {
+void VarValue::print() {
 	cout << "valuetype = " << valuetype << "\t";
 	if (valuetype == 1)
 		cout << "int value = " << int_value << endl;
@@ -55,22 +55,22 @@ void varValue::print() {
 		cout << "undefined or error" << endl;
 }
 
-varValue varValue::operator+(const varValue& x) {
+VarValue VarValue::operator+(const VarValue& x) {
 	string tmp;
 	stringstream ss;
 
 	if ( this->valuetype == 1 ) {
 		switch ( x.valuetype ) {
 			case 1:
-				return varValue(this->int_value + x.int_value);
+				return VarValue(this->int_value + x.int_value);
 				break;
 			case 2:
-				return varValue(this->int_value + x.double_value);
+				return VarValue(this->int_value + x.double_value);
 				break;
 			case 3:
 				ss << this->int_value;
 				ss >> tmp;
-				return varValue(tmp + x.str_value);
+				return VarValue(tmp + x.str_value);
 				break;
 			default:
 				break;
@@ -78,15 +78,15 @@ varValue varValue::operator+(const varValue& x) {
 	} else if ( this->valuetype == 2 ) {
 		switch ( x.valuetype ) {
 			case 1:
-				return varValue(this->double_value + x.int_value);
+				return VarValue(this->double_value + x.int_value);
 				break;
 			case 2:
-				return varValue(this->double_value + x.double_value);
+				return VarValue(this->double_value + x.double_value);
 				break;
 			case 3:
 				ss << this->double_value;
 				ss >> tmp;
-				return varValue(tmp + x.str_value);
+				return VarValue(tmp + x.str_value);
 				break;
 			default:
 				break;
@@ -100,24 +100,24 @@ varValue varValue::operator+(const varValue& x) {
 				ss << x.double_value;
 				break;
 			case 3:
-				return varValue(this->str_value + x.str_value);
+				return VarValue(this->str_value + x.str_value);
 				break;
 			default:
 				break;
 		}
 		ss >> tmp;
-		return varValue(this->str_value + tmp);
+		return VarValue(this->str_value + tmp);
 	}
 }
 
-varValue varValue::operator-(const varValue& x) {
+VarValue VarValue::operator-(const VarValue& x) {
 	if ( this->valuetype == 1 ) {
 		switch ( x.valuetype ) {
 			case 1:
-				return varValue(this->int_value - x.int_value);
+				return VarValue(this->int_value - x.int_value);
 				break;
 			case 2:
-				return varValue(this->int_value - x.double_value);
+				return VarValue(this->int_value - x.double_value);
 				break;
 			default:
 				break;
@@ -125,10 +125,10 @@ varValue varValue::operator-(const varValue& x) {
 	} else if ( this->valuetype == 2 ) {
 		switch ( x.valuetype ) {
 			case 1:
-				return varValue(this->double_value - x.int_value);
+				return VarValue(this->double_value - x.int_value);
 				break;
 			case 2:
-				return varValue(this->double_value - x.double_value);
+				return VarValue(this->double_value - x.double_value);
 				break;
 			default:
 				break;
@@ -136,14 +136,14 @@ varValue varValue::operator-(const varValue& x) {
 	}
 }
 
-varValue varValue::operator*(const varValue& x) {
+VarValue VarValue::operator*(const VarValue& x) {
 	if ( this->valuetype == 1 ) {
 		switch ( x.valuetype ) {
 			case 1:
-				return varValue(this->int_value * x.int_value);
+				return VarValue(this->int_value * x.int_value);
 				break;
 			case 2:
-				return varValue(this->int_value * x.double_value);
+				return VarValue(this->int_value * x.double_value);
 				break;
 			default:
 				break;
@@ -151,10 +151,10 @@ varValue varValue::operator*(const varValue& x) {
 	} else if ( this->valuetype == 2 ) {
 		switch ( x.valuetype ) {
 			case 1:
-				return varValue(this->double_value * x.int_value);
+				return VarValue(this->double_value * x.int_value);
 				break;
 			case 2:
-				return varValue(this->double_value * x.double_value);
+				return VarValue(this->double_value * x.double_value);
 				break;
 			default:
 				break;
@@ -162,14 +162,14 @@ varValue varValue::operator*(const varValue& x) {
 	}
 }
 
-varValue varValue::operator/(const varValue& x) {
+VarValue VarValue::operator/(const VarValue& x) {
 	if ( this->valuetype == 1 ) {
 		switch ( x.valuetype ) {
 			case 1:
-				return varValue(double(this->int_value) / x.int_value);
+				return VarValue(double(this->int_value) / x.int_value);
 				break;
 			case 2:
-				return varValue(this->int_value / x.double_value);
+				return VarValue(this->int_value / x.double_value);
 				break;
 			default:
 				break;
@@ -177,10 +177,10 @@ varValue varValue::operator/(const varValue& x) {
 	} else if ( this->valuetype == 2 ) {
 		switch ( x.valuetype ) {
 			case 1:
-				return varValue(this->double_value / x.int_value);
+				return VarValue(this->double_value / x.int_value);
 				break;
 			case 2:
-				return varValue(this->double_value / x.double_value);
+				return VarValue(this->double_value / x.double_value);
 				break;
 			default:
 				break;
@@ -188,14 +188,14 @@ varValue varValue::operator/(const varValue& x) {
 	}
 }
 
-varValue varValue::operator%(const varValue& x) {
+VarValue VarValue::operator%(const VarValue& x) {
 	if ( this->valuetype == 1 ) {
 		switch ( x.valuetype ) {
 			case 1:
-				return varValue(this->int_value % x.int_value);
+				return VarValue(this->int_value % x.int_value);
 				break;
 			case 2:
-				return varValue(fmod(this->int_value, x.double_value));
+				return VarValue(fmod(this->int_value, x.double_value));
 				break;
 			default:
 				break;
@@ -203,10 +203,10 @@ varValue varValue::operator%(const varValue& x) {
 	} else if ( this->valuetype == 2 ) {
 		switch ( x.valuetype ) {
 			case 1:
-				return varValue(fmod(this->double_value, x.int_value));
+				return VarValue(fmod(this->double_value, x.int_value));
 				break;
 			case 2:
-				return varValue(fmod(this->double_value, x.double_value));
+				return VarValue(fmod(this->double_value, x.double_value));
 				break;
 			default:
 				break;
@@ -221,12 +221,12 @@ int ActRec::getSize() {
 	return mapVar.size();
 }
 
-void ActRec::addVar(string varName, varValue val) {
+void ActRec::addVar(string varName, VarValue val) {
 	mapVar[varName] = val;	
 }
 
-varValue ActRec::getValue(string varName) {
-	varValue tmp;
+VarValue ActRec::getValue(string varName) {
+	VarValue tmp;
 	if (mapVar.count(varName))
 		tmp = mapVar[varName];
 	return tmp;
@@ -250,13 +250,13 @@ bool ActRecManager::deleteAR() {
 	return res;
 }
 
-void ActRecManager::addVar(string varName, varValue val) {
+void ActRecManager::addVar(string varName, VarValue val) {
 	top().addVar(varName, val);	
 }
 
-varValue ActRecManager::acquireValue(string varName) {
+VarValue ActRecManager::acquireValue(string varName) {
 	int size = getSize();
-	varValue resValue;
+	VarValue resValue;
 	while (size--) {
 		resValue = vecActRec[size].getValue(varName);
 		if (resValue.getValueType() != -1)

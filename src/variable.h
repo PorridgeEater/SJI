@@ -9,22 +9,22 @@
 
 using namespace std;
 
-class varValue {
+class VarValue {
 public:
-	varValue();
-	varValue(double);
-	varValue(string);
+	VarValue();
+	VarValue(double);
+	VarValue(string);
 	int getValueType();
 	long long getIntValue();
 	double getDoubleValue();
 	string getStrValue();
 	void print();
 
-	varValue operator+(const varValue&);
-	varValue operator-(const varValue&);
-	varValue operator*(const varValue&);
-	varValue operator/(const varValue&);
-	varValue operator%(const varValue&);
+	VarValue operator+(const VarValue&);
+	VarValue operator-(const VarValue&);
+	VarValue operator*(const VarValue&);
+	VarValue operator/(const VarValue&);
+	VarValue operator%(const VarValue&);
 
 private:
 	int valuetype;			// -1 for undefined, 0 for null, 1 for int, 2 for double, 3 for string
@@ -37,10 +37,10 @@ class ActRec {
 public:
 	ActRec();
 	int getSize();
-	void addVar(string varName, varValue val);
-	varValue getValue(string varName);
+	void addVar(string varName, VarValue val);
+	VarValue getValue(string varName);
 private:
-	map<string, varValue> mapVar;	
+	map<string, VarValue> mapVar;	
 };
 
 class ActRecManager {
@@ -48,11 +48,13 @@ public:
 	int getSize();
 	void insertAR(ActRec ar);
 	bool deleteAR();
-	void addVar(string varName, varValue val);
-	varValue acquireValue(string varName);
+	void addVar(string varName, VarValue val);
+	VarValue acquireValue(string varName);
 	ActRec& top();	// pay attention to copy construct
 private:
 	vector<ActRec> vecActRec;
 };
+
+extern ActRecManager actRecManager;
 
 #endif
