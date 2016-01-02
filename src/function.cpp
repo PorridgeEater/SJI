@@ -1,4 +1,5 @@
 #include "function.h"
+#include "interpreter.h"
 
 void Function::print(){
 	cerr<<"Function info :"<<endl;
@@ -77,8 +78,7 @@ VarValue callFunction(const string name, const string argList){
 		}
 	}
 	actRecManager.insertAR(ar);
-	//VarValue ret = interpreter(func.content);
-	VarValue ret;
+	VarValue ret = interpreter(func.content);
 	actRecManager.deleteAR();
 	return ret;
 }

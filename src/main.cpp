@@ -12,11 +12,15 @@ using namespace std;
 
 int main(int argc, char const *argv[])
 {
-    ifstream in("test.js");
-    stringstream buffer;
-    buffer << in.rdbuf();
-    actRecManager.insertAR(ActRec());
-    interpreter(buffer.str());
-    actRecManager.deleteAR();
+	try{
+	    ifstream in("test.js");
+	    stringstream buffer;
+	    buffer << in.rdbuf();
+	    actRecManager.insertAR(ActRec());
+	    interpreter(buffer.str());
+	    actRecManager.deleteAR();
+	} catch (Exception e){
+		e.errMessage();
+	}
     return 0;
 }
