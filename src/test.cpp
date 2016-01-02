@@ -327,28 +327,28 @@ int main() {
 
 
 	/*  变量的测试  */
-	VarValue testvv1(5);
-	VarValue testvv2("hello");
-	VarValue testvv3(2.5);
-	ActRec testAR1;
-	testAR1.addVar("testvar", testvv1);
-	testAR1.addVar("testvar2", testvv2);
-	testAR1.addVar("testvar3", testvv3);
-	// cout << "TEST ADDVAR" << endl;
-	// cout << "AR1's size = " << testAR1.getSize() << endl;
-	// cout << endl;
-	actRecManager.insertAR(testAR1);
+	// VarValue testvv1(5);
+	// VarValue testvv2("hello");
+	// VarValue testvv3(2.5);
+	// ActRec testAR1;
+	// testAR1.addVar("testvar", testvv1);
+	// testAR1.addVar("testvar2", testvv2);
+	// testAR1.addVar("testvar3", testvv3);
+	// // cout << "TEST ADDVAR" << endl;
+	// // cout << "AR1's size = " << testAR1.getSize() << endl;
+	// // cout << endl;
+	// actRecManager.insertAR(testAR1);
 
 
-	// getExpResult("  testvar + (\' \' + testvar2) + \' \' + (1/2*6%2 + testvar3)  ").print();
-	// getExpResult("  testvar  ").print();
-	getExpResult("  testvar = testvar2  ").print();
-	getExpResult("  testvar = testvar + (\' \' + testvar2) + \' \' + (1/2*6%2 + testvar3)  ").print();
+	// // getExpResult("  testvar + (\' \' + testvar2) + \' \' + (1/2*6%2 + testvar3)  ").print();
+	// // getExpResult("  testvar  ").print();
+	// getExpResult("  testvar = testvar2  ").print();
+	// getExpResult("  testvar = testvar + (\' \' + testvar2) + \' \' + (1/2*6%2 + testvar3)  ").print();
 	// getExpResult("  testvar  ").print();
 
 	// getExpResult(" 0.0 ").print();
 	// getExpResult(" 1 > 0 ;").print();
 
-	//TODO  函数的测试
+	getExpResult("  1 1  ").print();
 	return 0;
 }

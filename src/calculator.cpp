@@ -4,6 +4,7 @@
 #include "variable.h"
 #include "function.h"
 #include "calculator.h"
+#include "exception.h"
 #define dbg(x) cout<<#x<<" "<<x<<endl
 
 
@@ -80,7 +81,7 @@ ostream &operator<<(ostream &out, NumOrOp t) {
 MyStream::MyStream(string expr):expr(expr), p(0) {}
 bool MyStream::hasNext() {
 	while (p < expr.size() && expr[p] == ' ') p++;
-	return p != expr.size() && expr[p] != ';';
+	return p != expr.size();// && expr[p] != ';';
 }
 string MyStream::next() {
 	string ret = "";
@@ -181,10 +182,10 @@ int MyStream::nextType() {
 }
 bool MyStream::hasExtraExp() {
 	while (p < expr.size() && expr[p] == ' ') p++;
-	if (p < expr.size() && expr[p] == ';') {
-		p++;
-		while (p < expr.size() && expr[p] == ' ') p++;
-	}
+	// if (p < expr.size() && expr[p] == ';') {
+	// 	p++;
+	// 	while (p < expr.size() && expr[p] == ' ') p++;
+	// }
 	return p != expr.size();
 }
 string MyStream::_next() {
@@ -258,8 +259,8 @@ static int cmpOp(char c1, char c2) {
 // 	return nums[nums.size()-1];
 // }
 void cal(vector<NumOrOp> &nums, char ch) {
-	VarValue *pb = nums[nums.size()-1].var, b = nums[nums.size()-1].num; nums.pop_back();
-	VarValue *pa = nums[nums.size()-1].var, a = nums[nums.size()-1].num; nums.pop_back();
+	NumOrOp _b = nums[nums.size()-1]; VarValue *pb = nums[nums.size()-1].var, b = nums[nums.size()-1].num; nums.pop_back();
+	NumOrOp _a = nums[nums.size()-1]; VarValue *pa = nums[nums.size()-1].var, a = nums[nums.size()-1].num; nums.pop_back();
 	// a.print(); cout<<a.getStrValue().size()<<endl; cout<<ch<<endl; b.print(); cout<<b.getStrValue().size()<<endl; cout<<endl;
 	VarValue c;
 	switch (ch) {
@@ -268,7 +269,10 @@ void cal(vector<NumOrOp> &nums, char ch) {
 	case '*': c=a*b; break;
 	case '/': c=a/b; break;
 	case '%': c=a%b; break;
-	case '=': c=(*pa=b); break; //TODO 加上赋值
+	case '=':
+		if (_a.type != ITS_VAR)
+			throw Exception("Invalid left-hand side in assignment.");
+		c=(*pa=b); break; //TODO 加上赋值
 	default: break;
 	}
 	nums.push_back(c);
@@ -279,7 +283,7 @@ static VarValue calSuffix(const vector<NumOrOp> &suf) {
 	for (int i=0; i<suf.size(); i++)
 		if (suf[i].type == ITS_NUM || suf[i].type == ITS_VAR) nums.push_back(suf[i]);
 		else cal(nums, suf[i].op);
-	assert(nums.size() == 1);
+	throw Exception("More than one result value.");// assert(nums.size() == 1);
 	return ITS_VAR ? *nums[nums.size()-1].var : nums[nums.size()-1].num;
 }
 
@@ -294,17 +298,17 @@ VarValue getExpResult(string expr) {
 	// puts("!!!!!!!!!!!!!");
 	// cout<<expr<<endl;
 
-	if (expr.size() == 0) return UNDEFINED;  //表达式为空
+	if (expr.size() == 0) return UNDEFINED;  //表达式为空，则返回UNDEFINED
 	vector<NumOrOp> suf;
 	vector<char> ops;
 
 	MyStream in = MyStream(expr);
-	int preType = MIN_INT;
-	while (in.hasNext()) {
-		int type = in.nextType();
+	int type, preType = MIN_INT;
+	for (; in.hasNext(); preType=type) {
+		type = in.nextType();
 		// cout<<"haha"<<endl;
-		// cout<<"type="<<type<<" | "<<in._next()<<endl;
-		if (!isValid(preType, type)) return UNDEFINED;  //表达式有问题
+		// cout<<"type="<<type<<" preType="<<preType<<" | "<<in._next()<<endl;
+		if (!isValid(preType, type)) throw Exception("Unexpected token: " + string(in.next()));  //表达式有问题
 
 		if (type == OPERATOR_TYPE || type == LEFT_BRACKET_TYPE || type == RIGHT_BRACKET_TYPE) {
 			char c = in.next()[0];
@@ -351,7 +355,6 @@ VarValue getExpResult(string expr) {
 
 			//要加上f(1)[2]之类情况的判断??
 			string s = in.next();
-			// cout<<s<<endl;
 			int d = s.find(" ");
 			string name = s.substr(0, d), arglist = s.substr(d, s.size()-d);
 			suf.push_back(NumOrOp( callFunction(name, arglist) ));
@@ -363,12 +366,12 @@ VarValue getExpResult(string expr) {
 		// 	return UNDEFINED;
 		// }
 		else {  /*  未知错误  */
-			puts("Unknown error.");
+			throw Exception("Unknown error.");
 			return UNDEFINED;
 		}
 	}
 	// puts("Ready to cal");
-	if (in.hasExtraExp()) return puts("Extra expression."), UNDEFINED;  /*  分号后面还有表达式，错误  */
+	if (in.hasExtraExp()) throw Exception("Extra expression");  /*  分号后面还有表达式，错误  */
 
 	// puts("Start to cal");
 
