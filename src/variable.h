@@ -8,11 +8,20 @@
 
 using namespace std;
 
-struct varValue {
+class varValue {
+public:
+	varValue();
+	varValue(int);
+	varValue(double);
+	varValue(string);
+	int getValueType();
+	int getIntValue();
+	double getDoubleValue();
+	string getStrValue();
+private:
 	int valuetype;			// -1 for undefined, 0 for null, 1 for int, 2 for double, 3 for string
 	double num_value;
 	string str_value;
-	varValue(double num_value);
 };
 
 class ActRec {

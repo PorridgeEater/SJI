@@ -1,11 +1,43 @@
 #include "variable.h"
 
-
-varValue::varValue(double):num_value(num_value), valuetype(2) {
+// implement varValue
+varValue::varValue() {
+	valuetype = -1;
 }
 
-ActRec::ActRec() {
+varValue::varValue(int x) {
+	valuetype = 1;
+	num_value = x;
 }
+
+varValue::varValue(double x) {
+	valuetype = 2;
+	num_value = x;
+}
+
+varValue::varValue(string x) {
+	valuetype = 3;
+	str_value = x;
+}
+
+int varValue::getValueType() {
+	return valuetype;
+}
+
+int varValue::getIntValue() {
+	return (int)num_value;
+}
+
+double varValue::getDoubleValue() {
+	return num_value;
+}
+
+string varValue::getStrValue() {
+	return str_value;
+}
+
+// implement ActRec
+ActRec::ActRec() {}
 
 int ActRec::getSize() {
 	return mapVar.size();
@@ -17,14 +49,12 @@ void ActRec::addVar(string varName, varValue val) {
 
 varValue ActRec::getValue(string varName) {
 	varValue tmp;
-	tmp.valuetype = -1;
 	if (mapVar.count(varName))
 		tmp = mapVar[varName];
 	return tmp;
 }
 
-
-
+// implement ActRecManager
 int ActRecManager::getSize() {
 	return vecActRec.size();
 }
@@ -51,7 +81,7 @@ varValue ActRecManager::acquireValue(string varName) {
 	varValue resValue;
 	while (size--) {
 		resValue = vecActRec[size].getValue(varName);
-		if (resValue.valuetype != -1)
+		if (resValue.getValueType() != -1)
 			break;
 	}
 	return resValue;

@@ -1,7 +1,8 @@
 #include "variable.h"
 #include "calculator.h"
 
-/*  //variable test
+/*
+//variable test
 int main()
 {
 	string queryName;
@@ -9,19 +10,12 @@ int main()
 	ActRec testAR2;
 	ActRec testAR3;
 
-	varValue testvv1;
-	varValue testvv2;
-	varValue testvv3;
+	varValue testvv1(5);
+	varValue testvv2("hello");
+	varValue testvv3(2.15);
 	varValue receivevv;
 
 	ActRecManager testARM;
-
-	testvv1.valuetype = 1;
-	testvv1.num_value = 5;
-	testvv2.valuetype = 3;
-	testvv2.str_value = "hello";
-	testvv3.valuetype = 2;
-	testvv3.num_value = 2.15;
 
 	// test addVar func, success!
 	testAR1.addVar("testvar", testvv1);
@@ -38,13 +32,13 @@ int main()
 	queryName = "testvar";
 	receivevv = testAR1.getValue(queryName);
 	cout << "query for AR1's " << queryName << endl;
-	cout << "valuetype = " << receivevv.valuetype << endl;
-	cout << "value = " << receivevv.num_value << endl;
+	cout << "valuetype = " << receivevv.getValueType() << endl;
+	cout << "value = " << receivevv.getIntValue() << endl;
 	queryName = "testvar2";
 	receivevv = testAR1.getValue(queryName);
 	cout << "query for AR1's " << queryName << endl;
-	cout << "valuetype = " << receivevv.valuetype << endl;
-	cout << "value = " << receivevv.str_value << endl;
+	cout << "valuetype = " << receivevv.getValueType() << endl;
+	cout << "value = " << receivevv.getStrValue() << endl;
 	cout << endl;
 
 	// test add the same name var, will update the value, success!
@@ -53,15 +47,15 @@ int main()
 	receivevv = testAR1.getValue(queryName);
 	cout << "TEST UPDATE VALUE" << endl;
 	cout << "update for AR1's " << queryName << endl;
-	cout << "valuetype = " << receivevv.valuetype << endl;
-	cout << "value = " << receivevv.num_value << endl;
+	cout << "valuetype = " << receivevv.getValueType() << endl;
+	cout << "value = " << receivevv.getDoubleValue() << endl;
 	cout << endl;
 
 	// test getValue with non-exist varName, success!
 	// non-exist var will return valuetype -1
 	receivevv = testAR1.getValue("undefine");
 	cout << "TEST GET NON-EXIST VALUE" << endl;
-	cout << "valuetype = " << receivevv.valuetype << endl;
+	cout << "valuetype = " << receivevv.getValueType() << endl;
 	cout << endl;
 
 	cout << "----------------------------" << endl << endl;
@@ -79,8 +73,8 @@ int main()
 	// we can find that it get the value from the stack top AR
 	receivevv = testARM.acquireValue("testvar");
 	cout << "TEST GET VALUE IN ActRecManager" << endl;
-	cout << "valuetype = " << receivevv.valuetype << endl;
-	cout << "value = " << receivevv.num_value << endl;
+	cout << "valuetype = " << receivevv.getValueType() << endl;
+	cout << "value = " << receivevv.getIntValue() << endl;
 	cout << endl;
 
 	// test add a variable in the top Activity Record
@@ -92,8 +86,8 @@ int main()
 	receivevv = testARM.acquireValue("testvar3");
 	cout << "TEST ADD VARIABLE IN THE TOP AR" << endl;
 	
-	cout << "valuetype = " << receivevv.valuetype << endl;
-	cout << "value = " << receivevv.num_value << endl;
+	cout << "valuetype = " << receivevv.getValueType() << endl;
+	cout << "value = " << receivevv.getDoubleValue() << endl;
 	cout << endl;
 
 	// test delete the top activity record, success!
@@ -105,6 +99,6 @@ int main()
 }
 */
 
-
 int main() {
+	
 }
