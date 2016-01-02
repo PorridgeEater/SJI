@@ -281,6 +281,15 @@ bool ActRecManager::deleteAR() {
 }
 
 void ActRecManager::addVar(string varName, VarValue val) {
+	int size = getSize();
+	VarValue resValue;
+	while (size--) {
+		resValue = vecActRec[size].getValue(varName);
+		if (resValue.getValueType() != -1){
+			vecActRec[size].addVar(varName, val);
+			return;
+		}
+	}
 	top().addVar(varName, val);	
 }
 

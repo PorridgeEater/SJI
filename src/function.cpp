@@ -59,6 +59,7 @@ void defineFunction(const string name, const string argList, const string conten
 }
 
 VarValue callFunction(const string name, const string argList){
+	cerr<<"#### callFunction"<<endl;
 	Function func;
 	if (!funcList.get(name,func)) throw Exception("No such a function.");
 	func.print();
