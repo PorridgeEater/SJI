@@ -317,8 +317,6 @@ bool VarValue::operator ==(const VarValue& x) {
 	}
 }
 
-
-
 // implement ActRec
 ActRec::ActRec() {}
 
@@ -404,13 +402,11 @@ Function ActRecManager::getFunc(const string &name) {
 	throw Exception("No such a function \""+name+"()\".");
 }
 
-
-
-void ActRecManager::addVar(string varName, VarValue val) {
+void ActRecManager::setVar(string varName, VarValue val) {
 	int size = getSize();
 	VarValue resValue;
 	while (size--) {
-		try{
+		try {
 			resValue = vecActRec[size].getValue(varName);
 			vecActRec[size].addVar(varName, val);
 			return;
@@ -418,6 +414,10 @@ void ActRecManager::addVar(string varName, VarValue val) {
 			continue;
 		}
 	}
+	addVar(varName, val);
+}
+
+void ActRecManager::addVar(string varName, VarValue val) {
 	top().addVar(varName, val);	
 }
 

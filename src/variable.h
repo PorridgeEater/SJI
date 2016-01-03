@@ -77,6 +77,7 @@ public:
 	int getSize();
 	void insertAR(ActRec ar);
 	bool deleteAR();
+	void setVar(string varName, VarValue val);
 	void addVar(string varName, VarValue val=VarValue());
 	VarValue acquireValue(string varName);
 	VarValue* acquireValuePointer(string varName);

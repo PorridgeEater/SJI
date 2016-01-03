@@ -393,6 +393,50 @@ int main() {
 	// getExpResult(" 0.0 ").print();
 	// getExpResult(" 1 > 0 ;").print();
 
+
+	// fix local scope variable bug
+	// VarValue testvv1(5);
+	// VarValue testvv2(2.5);	
+	// VarValue testvv3("hello");
+	// VarValue testvv4("world");
+	// VarValue receivevv;
+
+	// ActRec testAR1;
+	// ActRec testAR2;
+	// ActRec testAR3;
+
+	// ActRecManager testARM;
+
+	// testAR1.addVar("testvar", testvv1);
+	// testAR1.addVar("testvar2", testvv2);
+	// testAR1.addVar("testvar3", testvv3);
+	// testAR2.addVar("testvar", testvv1);
+	// testAR2.addVar("testvar2", testvv2);
+
+	// testARM.insertAR(testAR1);
+	// testARM.insertAR(testAR2);
+
+/*
+	// test add a variable in the top Activity Record
+	cout << "top size = " << testARM.top().getSize() << endl;
+	testARM.addVar("testvar3", testvv3);
+	cout << "top size = " << testARM.top().getSize() << endl;
+
+	receivevv = testARM.acquireValue("testvar3");
+	cout << "TEST ADD VARIABLE IN THE TOP AR" << endl;
+	receivevv.print();
+	cout << endl;
+*/                                                        
+
+	// cout << "top size = " << testARM.top().getSize() << endl;
+	// testARM.setVar("testvar3", testvv4);
+	// cout << "top size = " << testARM.top().getSize() << endl;
+
+	// receivevv = testARM.acquireValue("testvar3");
+	// cout << "TEST ADD VARIABLE IN THE TOP AR" << endl;
+	// receivevv.print();
+	// cout << endl;	
+
 	getExpResult("  1 1  ").print();
 	return 0;
 }
