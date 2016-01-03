@@ -8,6 +8,7 @@ void splitArgList(const string &argList,vector<string> &v){
 		if (argList[i]!=' ') tmp[cnt++]=argList[i];
 	tmp[cnt]='\0';
 	string s(tmp);
+	if (s.length()==0) return;
 	for (int i=0,last=-1,l=s.length();i<=l;i++){
 		if (i==l || s[i]==','){
 			if (i<=last+1) throw Exception("Arguments are wrong.");
