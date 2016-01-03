@@ -20,7 +20,6 @@
 
 bool isDigit(char c);
 bool isCharacter(char c);
-bool isOperator(char c);
 double stringToDouble(string s);
 
 VarValue getExpResult(string expr);

@@ -33,14 +33,59 @@ static const int ITS_NUM = 1;
 static const int ITS_OP = 2;
 
 
+
+
+struct Operator {
+	static const int MAX_SIZE = 2;
+
+	char t[MAX_SIZE];
+	int size;
+	Operator() { size=0; }
+	Operator(char c) { t[0]=c; size=1; }
+	Operator(char a, char b) { t[0]=a; t[1]=b; size=2; }
+	Operator(string s) {
+		assert(s.size()<=MAX_SIZE);
+		size = s.size();
+		for (int i=0; i<size; i++) t[i] = s[i];
+	}
+	char &operator[](int d) { assert(d<size); return t[d]; }
+	const char &operator[](int d) const { assert(d<size); return t[d]; }
+	bool operator==(const Operator &a) const {
+		if (size != a.size) return 0;
+		bool flag=0;
+		for (int i=0; i<size; i++)
+			if (t[i] != a[i]) return 0;
+		return 1;
+	}
+	bool operator!=(const Operator &a) const {
+		return !(*this==a);
+	}
+};
+ostream &operator<<(ostream &out, const Operator &t) {
+	for (int i=0; i<t.size; i++)
+		out<<t[i];
+	return out;
+}
+
+
+
+
+
 bool isDigit(char c) {
 	return c>='0' && c<='9';
 }
 bool isCharacter(char c) {
 	return (c>='a'&&c<='z') || (c>='A'&&c<='Z');
 }
-bool isOperator(char c) {
-	return c=='+' || c=='-' || c=='*' || c=='/' || c=='%' || c=='=';
+bool isOperator(Operator op) {
+	return (op == Operator('+')
+		|| op == Operator('-')
+		|| op == Operator('*')
+		|| op == Operator('/')
+		|| op == Operator('%')
+		|| op == Operator('=')
+		|| op == Operator('=', '=')
+		);
 }
 bool isSpace(char c) {
 	return c==' ' || c=='\t';
@@ -67,10 +112,11 @@ struct NumOrOp {
 	int type;
 	VarValue num;
 	VarValue *var;
-	char op;
-	NumOrOp(VarValue a);
-	NumOrOp(VarValue *a);
-	NumOrOp(char c);
+	Operator op;
+	NumOrOp(VarValue a):num(a), type(ITS_NUM) {}
+	NumOrOp(VarValue *a):var(a), type(ITS_VAR), num(*a) {}
+	NumOrOp(Operator c):op(c), type(ITS_OP), num(UNDEFINED) {}
+
 };
 ostream &operator<<(ostream &out, NumOrOp t) {
 	if (t.type == ITS_NUM) return out<<(t.num).getIntValue()<<endl;
@@ -87,8 +133,13 @@ string MyStream::next() {
 	string ret = "";
 
 	int type = nextType();
-	if (type == WRONG_TYPE) return "";
+	if (type == WRONG_TYPE) return ret+=expr[p++];
 
+	if (type == OPERATOR_TYPE && (p<expr.size()-1 && isOperator(Operator(expr[p], expr[p+1])))) {
+		ret=ret+expr[p]+expr[p+1];
+		p+=2;
+		return ret;
+	}
 	if (type == OPERATOR_TYPE
 		|| type == LEFT_BRACKET_TYPE
 		|| type == RIGHT_BRACKET_TYPE) return ret+=expr[p++];
@@ -159,6 +210,7 @@ int MyStream::nextType() {
 	}
 
 	/*  如果这一位是操作符，那这就肯定是操作符  */  //非单字符操作符??
+	if (p<expr.size()-1 && isOperator(Operator(expr[p], expr[p+1]))) return OPERATOR_TYPE;  //先判断两个字符的运算符
 	if (isOperator(expr[p])) return OPERATOR_TYPE;
 
 	/*  如果这一位是字符，那后面跟的可能是函数或变量  */
@@ -180,14 +232,6 @@ int MyStream::nextType() {
 	}
 	return WRONG_TYPE;
 }
-// bool MyStream::hasExtraExp() {
-// 	while (p < expr.size() && expr[p] == ' ') p++;
-// 	// if (p < expr.size() && expr[p] == ';') {
-// 	// 	p++;
-// 	// 	while (p < expr.size() && expr[p] == ' ') p++;
-// 	// }
-// 	return p != expr.size();
-// }
 string MyStream::_next() {
 	int _p = p;
 	string s = next();
@@ -195,10 +239,6 @@ string MyStream::_next() {
 	return s;
 }
 
-
-NumOrOp::NumOrOp(VarValue a):num(a), type(ITS_NUM) {}
-NumOrOp::NumOrOp(VarValue *a):var(a), type(ITS_VAR), num(*a) {}
-NumOrOp::NumOrOp(char c):op(c), type(ITS_OP), num(UNDEFINED) {}
 
 
 
@@ -222,59 +262,36 @@ static bool isValid(int preType, int type) {
 	return typePair[preType][type];
 }
 
-int getPd(char c) {
+int getPd(Operator c) {
 	// if (c == '(') return -1;
-	if (c == '=') return 0;
-	if (c == '+' || c == '-') return 1;
-	if (c == '*' || c == '/' || c == '%') return 2;
+	if (c == '=') return -14;
+	if (c == string("==")) return -7;
+	if (c == '+' || c == '-') return -4;
+	if (c == '*' || c == '/' || c == '%') return -3;
 	// if (c == ')') return 3;
 	return -1;
 }
-static int cmpOp(char c1, char c2) {
+static int cmpOp(Operator c1, Operator c2) {
 	return getPd(c1) - getPd(c2);
 }
 
-// void cal(vector<VarValue> &nums, char ch) {
-// 	VarValue b = nums[nums.size()-1]; nums.pop_back();
-// 	VarValue a = nums[nums.size()-1]; nums.pop_back();
-// 	// a.print(); cout<<a.getStrValue().size()<<endl; cout<<ch<<endl; b.print(); cout<<b.getStrValue().size()<<endl; cout<<endl;
-// 	VarValue c;
-// 	switch (ch) {
-// 	case '+': c=a+b; break;
-// 	case '-': c=a-b; break;
-// 	case '*': c=a*b; break;
-// 	case '/': c=a/b; break;
-// 	case '%': c=a%b; break;
-// 	default: break;
-// 	}
-// 	nums.push_back(c);
-// 	// c.print(); cout<<c.getStrValue().size()<<endl; cout<<endl<<endl;
-// }
-// static VarValue calSuffix(const vector<NumOrOp> &suf) {
-// 	vector<VarValue> nums;
-// 	for (int i=0; i<suf.size(); i++)
-// 		if (suf[i].type == ITS_NUM) nums.push_back(suf[i].num);
-// 		else cal(nums, suf[i].op);
-// 	assert(nums.size() == 1);
-// 	return nums[nums.size()-1];
-// }
-void cal(vector<NumOrOp> &nums, char ch) {
+void cal(vector<NumOrOp> &nums, Operator ch) {
 	NumOrOp _b = nums[nums.size()-1]; VarValue *pb = nums[nums.size()-1].var, b = nums[nums.size()-1].num; nums.pop_back();
 	NumOrOp _a = nums[nums.size()-1]; VarValue *pa = nums[nums.size()-1].var, a = nums[nums.size()-1].num; nums.pop_back();
 	// a.print(); cout<<a.getStrValue().size()<<endl; cout<<ch<<endl; b.print(); cout<<b.getStrValue().size()<<endl; cout<<endl;
 	VarValue c;
-	switch (ch) {
-	case '+': c=a+b; break;
-	case '-': c=a-b; break;
-	case '*': c=a*b; break;
-	case '/': c=a/b; break;
-	case '%': c=a%b; break;
-	case '=':
+	if (ch == '+') c=a+b;
+	else if (ch == '-') c=a-b;
+	else if (ch == '*') c=a*b;
+	else if (ch == '/') c=a/b;
+	else if (ch == '%') c=a%b;
+	else if (ch == Operator("==")) c=(a==b);
+	else if (ch == '=') {
 		if (_a.type != ITS_VAR)
 			throw Exception("Invalid left-hand side in assignment.");
-		c=(*pa=b); break; //TODO 加上赋值
-	default: break;
+		c=(*pa=b);
 	}
+	else throw Exception("Unknown operator.");
 	nums.push_back(c);
 	// c.print(); cout<<c.getStrValue().size()<<endl; cout<<endl<<endl;
 }
@@ -301,7 +318,8 @@ VarValue getExpResult(string expr) {
 
 	if (expr.size() == 0) return UNDEFINED;  //表达式为空，则返回UNDEFINED
 	vector<NumOrOp> suf;
-	vector<char> ops;
+	// vector<char> ops;
+	vector<Operator> ops;
 
 	MyStream in = MyStream(expr);
 	int type, preType = MIN_INT;
@@ -312,10 +330,10 @@ VarValue getExpResult(string expr) {
 		if (!isValid(preType, type)) throw Exception("Unexpected token: " + string(in.next()));  //表达式有问题
 
 		if (type == OPERATOR_TYPE || type == LEFT_BRACKET_TYPE || type == RIGHT_BRACKET_TYPE) {
-			char c = in.next()[0];
+			Operator c = in.next();
 			if (ops.size() == 0 || c == '(') ops.push_back(c);
 			else {
-				char c0 = ops[ops.size()-1];
+				Operator c0 = ops[ops.size()-1];
 				if (c0 == '(' && c==')') ops.pop_back();
 				else if (c0 == '(') ops.push_back(c);
 				else if (c == ')') {
@@ -360,20 +378,11 @@ VarValue getExpResult(string expr) {
 			string name = s.substr(0, d), arglist = s.substr(d, s.size()-d);
 			suf.push_back(NumOrOp( callFunction(name, arglist) ));
 		}
-		// else if (type == LEFT_BRACKET_TYPE) {
-		// 	suf.push_back(NumOrOp( getExpResult(in.next()) ));
-		// }
-		// else if (type == RIGHT_BRACKET_TYPE) {  /*  前面没有左括号却有了右括号，错误  */
-		// 	return UNDEFINED;
-		// }
 		else {  /*  未知错误  */
 			throw Exception("Unknown error.");
 			return UNDEFINED;
 		}
 	}
-	// puts("Ready to cal");
-	// if (in.hasExtraExp()) throw Exception("Extra expression");  /*  分号后面还有表达式，错误  */
-
 	// puts("Start to cal");
 
 	while (ops.size()) suf.push_back(NumOrOp( ops[ops.size()-1] )), ops.pop_back();
