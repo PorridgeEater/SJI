@@ -301,7 +301,7 @@ static VarValue calSuffix(const vector<NumOrOp> &suf) {
 		if (suf[i].type == ITS_NUM || suf[i].type == ITS_VAR) nums.push_back(suf[i]);
 		else cal(nums, suf[i].op);
 	if (nums.size() > 1) throw Exception("More than one result value.");// assert(nums.size() == 1);
-	if (nums.size() == 0) throw Exception("Unknown error.");
+	if (nums.size() == 0) return UNDEFINED;
 	return ITS_VAR ? *nums[nums.size()-1].var : nums[nums.size()-1].num;
 }
 
