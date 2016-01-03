@@ -16,6 +16,15 @@
 
 using namespace std;
 
+class Function{
+public:
+	string name,content;
+	vector<string> arg;
+
+	void print();
+};
+
+
 class VarValue {
 public:
 	VarValue();
@@ -38,6 +47,7 @@ public:
 	
 	// overload logical operators
 	bool operator ==(const VarValue&);
+	bool operator <(const VarValue&);
 
 private:
 	int valuetype;			// -1 for undefined, 0 for null, 1 for int, 2 for double, 3 for string
@@ -53,8 +63,14 @@ public:
 	void addVar(string varName, VarValue val=VarValue());
 	VarValue getValue(string varName);
 	VarValue* getValuePointer(string varName);
+
+	int findFunc(const string &name);
+	void addFunc(const Function &func);
+	Function getFunc(const string &name);
+
 private:
-	map<string, VarValue> mapVar;	
+	map<string, VarValue> mapVar;
+	vector<Function> funcList;
 };
 
 class ActRecManager {
@@ -62,9 +78,12 @@ public:
 	int getSize();
 	void insertAR(ActRec ar);
 	bool deleteAR();
+	void setVar(string varName, VarValue val);
 	void addVar(string varName, VarValue val=VarValue());
 	VarValue acquireValue(string varName);
 	VarValue* acquireValuePointer(string varName);
+	Function getFunc(const string &name);
+	void addFunc(const Function &func);
 	ActRec& top();	// pay attention to copy construct
 private:
 	vector<ActRec> vecActRec;

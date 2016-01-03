@@ -311,7 +311,7 @@
 // 	cout << "stack size = " << testARM.getSize() << endl;
 // */	
 
-// test == success!
+/* test == success! */
 
 	// VarValue int_a(5);
 	// VarValue int_b(5);
@@ -356,6 +356,53 @@
 	// cout << (str_c == str_d) << endl;
 
 
+/* test < success! */
+
+	// VarValue int_a(5);
+	// VarValue int_b(5);
+	// VarValue int_c(6);
+	// VarValue int_d(10);
+
+	// VarValue double_a(5.12);
+	// VarValue double_b(5.12);
+	// VarValue double_c(6.23);
+	// VarValue double_d(10.00);
+
+	// VarValue str_a("abc");
+	// VarValue str_b("abc");
+	// VarValue str_c("5");
+	// VarValue str_d("5.00");
+	// VarValue str_e("10.12");
+	// VarValue str_f("abcdef");
+	// VarValue str_g("bcd");
+	// 	// INT == INT
+	// cout << "INT < INT" << endl;
+	// cout << (int_a < int_b) << endl;
+	// cout << (int_a < int_c) << endl;
+	// 	// INT < DOUBLE
+	// cout << "INT < DOUBLE" << endl;
+	// cout << (int_a < double_a) << endl;
+	// cout << (int_d < double_d) << endl;
+	// 	// INT < STRING
+	// cout << "INT < STRING" << endl;
+	// cout << (int_a < str_a) << endl;		
+	// cout << (int_a < str_c) << endl;
+	// cout << (int_a < str_e) << endl;
+	// 	// DOUBLE < DOUBLE
+	// cout << "DOUBLE < DOUBLE" << endl;
+	// cout << (double_a < double_b) << endl;
+	// cout << (double_a < double_c) << endl;
+	// 	// DOUBLE < STRING
+	// cout << "DOUBLE < STRING" << endl;
+	// cout << (double_a < str_d) << endl;
+	// cout << (double_a < str_e) << endl;
+	// 	// STRING < STRING
+	// cout << "STRING < STRING" << endl;
+	// cout << (str_a < str_b) << endl;
+	// cout << (str_a < str_c) << endl;
+	// cout << (str_c < str_d) << endl;
+	// cout << (str_f < str_g) << endl;
+
 // 	return 0;
 // }
 
@@ -392,6 +439,50 @@ int main() {
 
 	// getExpResult(" 0.0 ").print();
 	// getExpResult(" 1 > 0 ;").print();
+
+
+	// fix local scope variable bug
+	// VarValue testvv1(5);
+	// VarValue testvv2(2.5);	
+	// VarValue testvv3("hello");
+	// VarValue testvv4("world");
+	// VarValue receivevv;
+
+	// ActRec testAR1;
+	// ActRec testAR2;
+	// ActRec testAR3;
+
+	// ActRecManager testARM;
+
+	// testAR1.addVar("testvar", testvv1);
+	// testAR1.addVar("testvar2", testvv2);
+	// testAR1.addVar("testvar3", testvv3);
+	// testAR2.addVar("testvar", testvv1);
+	// testAR2.addVar("testvar2", testvv2);
+
+	// testARM.insertAR(testAR1);
+	// testARM.insertAR(testAR2);
+
+/*
+	// test add a variable in the top Activity Record
+	cout << "top size = " << testARM.top().getSize() << endl;
+	testARM.addVar("testvar3", testvv3);
+	cout << "top size = " << testARM.top().getSize() << endl;
+
+	receivevv = testARM.acquireValue("testvar3");
+	cout << "TEST ADD VARIABLE IN THE TOP AR" << endl;
+	receivevv.print();
+	cout << endl;
+*/                                                        
+
+	// cout << "top size = " << testARM.top().getSize() << endl;
+	// testARM.setVar("testvar3", testvv4);
+	// cout << "top size = " << testARM.top().getSize() << endl;
+
+	// receivevv = testARM.acquireValue("testvar3");
+	// cout << "TEST ADD VARIABLE IN THE TOP AR" << endl;
+	// receivevv.print();
+	// cout << endl;	
 
 	getExpResult("  1 1  ").print();
 	return 0;

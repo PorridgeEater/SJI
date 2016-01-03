@@ -3,6 +3,25 @@ var b = 1 ;
 var c = 2 ;
 d = 1;
 var e;
+
+var str="---------I'm a string--------------";
+print str;
+print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
+
+function f(){
+	print "first f()";
+}
+
+function g(){
+	function f(){
+		print "second f()";
+	}
+	f();
+}
+f();
+g();
+f();
+
 if ((b == 1)) {
 	print b;
 }

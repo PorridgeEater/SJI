@@ -6,6 +6,18 @@
 
 ActRecManager actRecManager;
 
+
+void Function::print(){
+	cerr<<"Function info :"<<endl;
+	cerr<<"name : "<<name<<endl;
+	cerr<<"content : "<<content<<endl;
+	cerr<<"arg : ";
+	for (int i=0;i<arg.size();i++)
+		cerr<<arg[i]<<" ";
+	cerr<<endl;
+	cerr<<"-------------------"<<endl;
+}
+
 // implement VarValue
 VarValue::VarValue() {
 	valuetype = UNDEFINED_TYPE;
@@ -300,7 +312,35 @@ bool VarValue::operator ==(const VarValue& x) {
 	}
 }
 
-
+bool VarValue::operator <(const VarValue& x) {
+	if ( this->valuetype == STRING_TYPE && x.valuetype == STRING_TYPE ) {
+		return (this->str_value < x.str_value);
+	} else {
+		double m, n;
+		stringstream ss;			
+		if ( this->valuetype == INT_TYPE )
+			m = this->int_value;
+		else if ( this->valuetype == DOUBLE_TYPE )
+			m = this->double_value;
+		else if ( this->valuetype == STRING_TYPE ) {
+			ss << this->str_value;
+			ss >> m;
+		}
+		if ( x.valuetype == INT_TYPE )
+			n = x.int_value;
+		else if ( x.valuetype == DOUBLE_TYPE )
+			n = x.double_value;
+		else if ( x.valuetype == STRING_TYPE ) {
+			ss << x.str_value;
+			ss >> n;
+		}
+		if ( n - m > eps ) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+}
 
 // implement ActRec
 ActRec::ActRec() {}
@@ -308,6 +348,26 @@ ActRec::ActRec() {}
 int ActRec::getSize() {
 	return mapVar.size();
 }
+
+int ActRec::findFunc(const string &name){
+	for (int i=0;i<funcList.size();i++){
+		if (funcList[i].name==name) return i;
+	}
+	return -1;
+}
+void ActRec::addFunc(const Function &func){
+	int t=findFunc(func.name);
+	if (t>=0) funcList[t]=func;
+	else funcList.push_back(func);
+}
+Function ActRec::getFunc(const string &name){
+	int t=findFunc(name);
+	if (t>=0){
+		return funcList[t];
+	}
+	else throw Exception("No such a function \""+name+"\"."); 
+}
+
 
 void ActRec::addVar(string varName, VarValue val) {
 	mapVar[varName] = val;	
@@ -327,6 +387,9 @@ VarValue* ActRec::getValuePointer(string varName) {
 		throw Exception("No such a variable in this scope.");
 }
 
+
+
+
 // implement ActRecManager
 int ActRecManager::getSize() {
 	return vecActRec.size();
@@ -345,11 +408,30 @@ bool ActRecManager::deleteAR() {
 	return res;
 }
 
-void ActRecManager::addVar(string varName, VarValue val) {
+
+void ActRecManager::addFunc(const Function &func) {
+	top().addFunc(func);	
+}
+
+Function ActRecManager::getFunc(const string &name) {
+	int size = getSize();
+	Function func;
+	while (size--) {
+		try{
+			func = vecActRec[size].getFunc(name);
+			return func;
+		} catch (Exception e) {
+			continue;
+		}
+	}
+	throw Exception("No such a function \""+name+"()\".");
+}
+
+void ActRecManager::setVar(string varName, VarValue val) {
 	int size = getSize();
 	VarValue resValue;
 	while (size--) {
-		try{
+		try {
 			resValue = vecActRec[size].getValue(varName);
 			vecActRec[size].addVar(varName, val);
 			return;
@@ -357,6 +439,10 @@ void ActRecManager::addVar(string varName, VarValue val) {
 			continue;
 		}
 	}
+	addVar(varName, val);
+}
+
+void ActRecManager::addVar(string varName, VarValue val) {
 	top().addVar(varName, val);	
 }
 
