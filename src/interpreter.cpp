@@ -138,6 +138,7 @@ static void forStatement(string condition, string content) {
         interpreter(iter);
         actRecManager.deleteAR();
         result = getExpResult(cond);
+        //cout << "cond: " << cond << " Result!: " << result.toString() << endl;
     }
     
     actRecManager.deleteAR();
@@ -276,7 +277,7 @@ VarValue interpreter(string code)
                 //cout << actRecManager.acquireValue(e).toString() << endl;
                 cout << "Expression: " << exp << endl;
                 cout << "Result:" << getExpResult(exp).toString() << endl;
-                actRecManager.addVar(e, getExpResult(exp));
+                actRecManager.setVar(e, getExpResult(exp));
                 //cout << actRecManager.acquireValue(e).toString() << endl;
                 //cout << getExpResult(exp).toString() << endl;
             }
