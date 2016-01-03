@@ -18,11 +18,6 @@ void Function::print(){
 	cerr<<"-------------------"<<endl;
 }
 
-
-
-
-
-
 // implement VarValue
 VarValue::VarValue() {
 	valuetype = UNDEFINED_TYPE;
@@ -310,6 +305,36 @@ bool VarValue::operator ==(const VarValue& x) {
 			ss >> n;
 		}
 		if ( abs(m-n) < eps ) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+}
+
+bool VarValue::operator <(const VarValue& x) {
+	if ( this->valuetype == STRING_TYPE && x.valuetype == STRING_TYPE ) {
+		return (this->str_value < x.str_value);
+	} else {
+		double m, n;
+		stringstream ss;			
+		if ( this->valuetype == INT_TYPE )
+			m = this->int_value;
+		else if ( this->valuetype == DOUBLE_TYPE )
+			m = this->double_value;
+		else if ( this->valuetype == STRING_TYPE ) {
+			ss << this->str_value;
+			ss >> m;
+		}
+		if ( x.valuetype == INT_TYPE )
+			n = x.int_value;
+		else if ( x.valuetype == DOUBLE_TYPE )
+			n = x.double_value;
+		else if ( x.valuetype == STRING_TYPE ) {
+			ss << x.str_value;
+			ss >> n;
+		}
+		if ( n - m > eps ) {
 			return true;
 		} else {
 			return false;
