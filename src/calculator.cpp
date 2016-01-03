@@ -48,6 +48,11 @@ struct Operator {
 		size = s.size();
 		for (int i=0; i<size; i++) t[i] = s[i];
 	}
+	operator string() {
+		string ret="";
+		for (int i=0; i<size; i++) ret+=t[i];
+		return ret;
+	}
 	char &operator[](int d) { assert(d<size); return t[d]; }
 	const char &operator[](int d) const { assert(d<size); return t[d]; }
 	bool operator==(const Operator &a) const {
@@ -84,6 +89,7 @@ bool isOperator(Operator op) {
 		|| op == Operator('/')
 		|| op == Operator('%')
 		|| op == Operator('=')
+		|| op == Operator('<')
 		|| op == Operator('=', '=')
 		);
 }
@@ -266,6 +272,7 @@ int getPd(Operator c) {
 	// if (c == '(') return -1;
 	if (c == '=') return -14;
 	if (c == string("==")) return -7;
+	if (c == '<') return -6;
 	if (c == '+' || c == '-') return -4;
 	if (c == '*' || c == '/' || c == '%') return -3;
 	// if (c == ')') return 3;
@@ -285,13 +292,14 @@ void cal(vector<NumOrOp> &nums, Operator ch) {
 	else if (ch == '*') c=a*b;
 	else if (ch == '/') c=a/b;
 	else if (ch == '%') c=a%b;
+	else if (ch == '<') c=a<b;
 	else if (ch == Operator("==")) c=(a==b);
 	else if (ch == '=') {
 		if (_a.type != ITS_VAR)
 			throw Exception("Invalid left-hand side in assignment.");
 		c=(*pa=b);
 	}
-	else throw Exception("Unknown operator.");
+	else throw Exception("Unknown operator: " + (string)ch);
 	nums.push_back(c);
 	// c.print(); cout<<c.getStrValue().size()<<endl; cout<<endl<<endl;
 }
@@ -386,6 +394,7 @@ VarValue getExpResult(string expr) {
 	// puts("Start to cal");
 
 	while (ops.size()) suf.push_back(NumOrOp( ops[ops.size()-1] )), ops.pop_back();
+	// if (expr.find('i') !=string::npos) cout<<"!!!!!!!---------!!!!!!!"<<calSuffix(suf)<<endl;
 	// suf[0].num.print();
 	// calSuffix(suf).print();
 	return calSuffix(suf);
