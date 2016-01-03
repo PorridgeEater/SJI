@@ -3,7 +3,7 @@ var b = 1 ;
 var c = 2 ;
 d = 1;
 var e;
-if ((a = 1 1)) {
+if ((a = 1)) {
 	print b;
 }
 function add(a, b)

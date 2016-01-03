@@ -180,14 +180,14 @@ int MyStream::nextType() {
 	}
 	return WRONG_TYPE;
 }
-bool MyStream::hasExtraExp() {
-	while (p < expr.size() && expr[p] == ' ') p++;
-	// if (p < expr.size() && expr[p] == ';') {
-	// 	p++;
-	// 	while (p < expr.size() && expr[p] == ' ') p++;
-	// }
-	return p != expr.size();
-}
+// bool MyStream::hasExtraExp() {
+// 	while (p < expr.size() && expr[p] == ' ') p++;
+// 	// if (p < expr.size() && expr[p] == ';') {
+// 	// 	p++;
+// 	// 	while (p < expr.size() && expr[p] == ' ') p++;
+// 	// }
+// 	return p != expr.size();
+// }
 string MyStream::_next() {
 	int _p = p;
 	string s = next();
@@ -283,7 +283,8 @@ static VarValue calSuffix(const vector<NumOrOp> &suf) {
 	for (int i=0; i<suf.size(); i++)
 		if (suf[i].type == ITS_NUM || suf[i].type == ITS_VAR) nums.push_back(suf[i]);
 		else cal(nums, suf[i].op);
-	throw Exception("More than one result value.");// assert(nums.size() == 1);
+	if (nums.size() > 1) throw Exception("More than one result value.");// assert(nums.size() == 1);
+	if (nums.size() == 0) throw Exception("Unknown error.");
 	return ITS_VAR ? *nums[nums.size()-1].var : nums[nums.size()-1].num;
 }
 
@@ -371,7 +372,7 @@ VarValue getExpResult(string expr) {
 		}
 	}
 	// puts("Ready to cal");
-	if (in.hasExtraExp()) throw Exception("Extra expression");  /*  分号后面还有表达式，错误  */
+	// if (in.hasExtraExp()) throw Exception("Extra expression");  /*  分号后面还有表达式，错误  */
 
 	// puts("Start to cal");
 
