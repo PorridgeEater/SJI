@@ -8,21 +8,21 @@ ActRecManager actRecManager;
 
 // implement VarValue
 VarValue::VarValue() {
-	valuetype = -1;
+	valuetype = UNDEFINED_TYPE;
 }
 
 VarValue::VarValue(double x) {
-	if (abs(x-(int)x) < eps) {
-		valuetype = 1;
+	if ( abs(x-(int)x) < eps ) {
+		valuetype = INT_TYPE;
 		int_value = (long long)x;
 	} else {
-		valuetype = 2;
+		valuetype = DOUBLE_TYPE;
 		double_value = x;
 	}
 }
 
 VarValue::VarValue(string x) {
-	valuetype = 3;
+	valuetype = STRING_TYPE;
 	str_value = x;
 }
 
@@ -42,63 +42,78 @@ string VarValue::getStrValue() {
 	return str_value;
 }
 
-bool VarValue::toBool(){
-	if (valuetype == UNDEFINED_TYPE || valuetype == NULL_TYPE)
-		return false;
-	if (valuetype == INT_TYPE)
-		return int_value!=0;
-	if (valuetype == DOUBLE_TYPE)
-		return double_value!=0;
-	if (valuetype == STRING_TYPE)
-		return str_value.length()!=0;
+bool VarValue::toBool() {
+	switch ( valuetype ) {
+		case UNDEFINED_TYPE:
+		case NULL_TYPE:
+			return false;
+			break;
+		case INT_TYPE:
+			return int_value!=0;
+			break;
+		case DOUBLE_TYPE:
+			return double_value!=0;
+			break;
+		case STRING_TYPE:
+			return str_value.length()!=0;
+			break;
+		default:
+			throw Exception("invalid valuetype!");
+			break;
+	}
 }
 
-string VarValue::toString(){
-	if (valuetype == UNDEFINED_TYPE)
-		return "undefined";
-	if (valuetype == NULL_TYPE)
-		return "null";
-	if (valuetype == INT_TYPE){
-		char tmp[100];
-		sprintf(tmp,"%lld",int_value);
-		return tmp;
+string VarValue::toString() {
+	switch ( valuetype ) {
+		case UNDEFINED_TYPE:
+			return "undefined";
+			break;
+		case NULL_TYPE:
+			return "null";
+			break;
+		case INT_TYPE:
+		{
+			char tmp[100];
+			sprintf(tmp, "%lld", int_value);
+			return tmp;
+			break;
+		}
+		case DOUBLE_TYPE:
+		{
+			string t;
+			stringstream ss;
+			ss << double_value;
+			ss >> t;
+			return t;
+			break;
+		}
+		case STRING_TYPE:
+			return str_value;
+			break;
+		default:
+			throw Exception("Invalid valuetype!");
+			break;
 	}
-	if (valuetype == DOUBLE_TYPE){
-		string tmp;
-		stringstream ss;
-		ss<<double_value;
-		ss>>tmp;
-		return tmp;
-	}
-	if (valuetype == STRING_TYPE)
-		return str_value;
 }
 
 void VarValue::print() {
 	cout << "valuetype = " << valuetype << "\t";
-	if (valuetype == INT_TYPE)
-		cout << "int value = " << int_value << endl;
-	else if (valuetype == DOUBLE_TYPE)
-		cout << "double value = " << double_value << endl;
-	else if (valuetype == STRING_TYPE)
-		cout << "string value = " << str_value << endl;
-	else
-		cout << "undefined or error" << endl;
+	cout << "value = " << toString() << endl;
 }
 
-VarValue VarValue::operator+(const VarValue& x) {
+VarValue VarValue::operator +(const VarValue& x) {
 	string tmp;
 	stringstream ss;
 
-	if ( this->valuetype == 1 ) {
+	if ( this->valuetype == INT_TYPE ) {
 		switch ( x.valuetype ) {
-			case 1:
+			case INT_TYPE:
 				return VarValue(this->int_value + x.int_value);
 				break;
-			case 2:
+			case DOUBLE_TYPE:
 				return VarValue(this->int_value + x.double_value);
 				break;
-			case 3:
+			case STRING_TYPE:
 				ss << this->int_value;
 				ss >> tmp;
 				return VarValue(tmp + x.str_value);
@@ -106,15 +121,15 @@ VarValue VarValue::operator+(const VarValue& x) {
 			default:
 				break;
 		}
-	} else if ( this->valuetype == 2 ) {
+	} else if ( this->valuetype == DOUBLE_TYPE ) {
 		switch ( x.valuetype ) {
-			case 1:
+			case INT_TYPE:
 				return VarValue(this->double_value + x.int_value);
 				break;
-			case 2:
+			case DOUBLE_TYPE:
 				return VarValue(this->double_value + x.double_value);
 				break;
-			case 3:
+			case STRING_TYPE:
 				ss << this->double_value;
 				ss >> tmp;
 				return VarValue(tmp + x.str_value);
@@ -122,7 +137,7 @@ VarValue VarValue::operator+(const VarValue& x) {
 			default:
 				break;
 		}
-	} else if ( this->valuetype == 3 ) {
+	} else if ( this->valuetype == STRING_TYPE ) {
 		switch ( x.valuetype ) {
 			case 1:
 				ss << x.int_value;
@@ -138,112 +153,154 @@ VarValue VarValue::operator+(const VarValue& x) {
 		}
 		ss >> tmp;
 		return VarValue(this->str_value + tmp);
+	} else {
+		throw Exception("invalid valuetype for +");
 	}
 }
 
-VarValue VarValue::operator-(const VarValue& x) {
-	if ( this->valuetype == 1 ) {
+VarValue VarValue::operator -(const VarValue& x) {
+	if ( this->valuetype == INT_TYPE ) {
 		switch ( x.valuetype ) {
-			case 1:
+			case INT_TYPE:
 				return VarValue(this->int_value - x.int_value);
 				break;
-			case 2:
+			case DOUBLE_TYPE:
 				return VarValue(this->int_value - x.double_value);
 				break;
 			default:
 				break;
 		}
-	} else if ( this->valuetype == 2 ) {
+	} else if ( this->valuetype == DOUBLE_TYPE ) {
 		switch ( x.valuetype ) {
-			case 1:
+			case INT_TYPE:
 				return VarValue(this->double_value - x.int_value);
 				break;
-			case 2:
+			case DOUBLE_TYPE:
 				return VarValue(this->double_value - x.double_value);
 				break;
 			default:
 				break;
 		}
+	} else {
+		throw Exception("invalid valuetype for -");
 	}
 }
 
-VarValue VarValue::operator*(const VarValue& x) {
-	if ( this->valuetype == 1 ) {
+VarValue VarValue::operator *(const VarValue& x) {
+	if ( this->valuetype == INT_TYPE ) {
 		switch ( x.valuetype ) {
-			case 1:
+			case INT_TYPE:
 				return VarValue(this->int_value * x.int_value);
 				break;
-			case 2:
+			case DOUBLE_TYPE:
 				return VarValue(this->int_value * x.double_value);
 				break;
 			default:
 				break;
 		}
-	} else if ( this->valuetype == 2 ) {
+	} else if ( this->valuetype == DOUBLE_TYPE ) {
 		switch ( x.valuetype ) {
-			case 1:
+			case INT_TYPE:
 				return VarValue(this->double_value * x.int_value);
 				break;
-			case 2:
+			case DOUBLE_TYPE:
 				return VarValue(this->double_value * x.double_value);
 				break;
 			default:
 				break;
 		}
+	} else {
+		throw Exception("invalid valuetype for *");
 	}
 }
 
-VarValue VarValue::operator/(const VarValue& x) {
-	if ( this->valuetype == 1 ) {
+VarValue VarValue::operator /(const VarValue& x) {
+	if ( this->valuetype == INT_TYPE ) {
 		switch ( x.valuetype ) {
-			case 1:
+			case INT_TYPE:
 				return VarValue(double(this->int_value) / x.int_value);
 				break;
-			case 2:
+			case DOUBLE_TYPE:
 				return VarValue(this->int_value / x.double_value);
 				break;
 			default:
 				break;
 		}
-	} else if ( this->valuetype == 2 ) {
+	} else if ( this->valuetype == DOUBLE_TYPE ) {
 		switch ( x.valuetype ) {
-			case 1:
+			case INT_TYPE:
 				return VarValue(this->double_value / x.int_value);
 				break;
-			case 2:
+			case DOUBLE_TYPE:
 				return VarValue(this->double_value / x.double_value);
 				break;
 			default:
 				break;
 		}
+	} else {
+		throw Exception("invalid valuetype for /");
 	}
 }
 
-VarValue VarValue::operator%(const VarValue& x) {
-	if ( this->valuetype == 1 ) {
+VarValue VarValue::operator %(const VarValue& x) {
+	if ( this->valuetype == INT_TYPE ) {
 		switch ( x.valuetype ) {
-			case 1:
+			case INT_TYPE:
 				return VarValue(this->int_value % x.int_value);
 				break;
-			case 2:
+			case DOUBLE_TYPE:
 				return VarValue(fmod(this->int_value, x.double_value));
 				break;
 			default:
 				break;
 		}
-	} else if ( this->valuetype == 2 ) {
+	} else if ( this->valuetype == DOUBLE_TYPE ) {
 		switch ( x.valuetype ) {
-			case 1:
+			case INT_TYPE:
 				return VarValue(fmod(this->double_value, x.int_value));
 				break;
-			case 2:
+			case DOUBLE_TYPE:
 				return VarValue(fmod(this->double_value, x.double_value));
 				break;
 			default:
 				break;
 		}
+	} else {
+		throw Exception("invalid valuetype for \%");
 	}
 }
+
+bool VarValue::operator ==(const VarValue& x) {
+	if ( this->valuetype == STRING_TYPE && x.valuetype == STRING_TYPE ) {
+		return (this->str_value == x.str_value);
+	} else {
+		double m, n;
+		stringstream ss;			
+		if ( this->valuetype == INT_TYPE )
+			m = this->int_value;
+		else if ( this->valuetype == DOUBLE_TYPE )
+			m = this->double_value;
+		else if ( this->valuetype == STRING_TYPE ) {
+			ss << this->str_value;
+			ss >> m;
+		}
+		if ( x.valuetype == INT_TYPE )
+			n = x.int_value;
+		else if ( x.valuetype == DOUBLE_TYPE )
+			n = x.double_value;
+		else if ( x.valuetype == STRING_TYPE ) {
+			ss << x.str_value;
+			ss >> n;
+		}
+		if ( abs(m-n) < eps ) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+}
+
+
 
 // implement ActRec
 ActRec::ActRec() {}
@@ -259,13 +316,15 @@ void ActRec::addVar(string varName, VarValue val) {
 VarValue ActRec::getValue(string varName) {
 	if (mapVar.count(varName))
 		return mapVar[varName];
-	else throw Exception("No such a variable in this scope.");
+	else 
+		throw Exception("No such a variable in this scope.");
 }
 
 VarValue* ActRec::getValuePointer(string varName) {
 	if (mapVar.count(varName))
 		return &(mapVar[varName]);
-	else throw Exception("No such a variable in this scope.");
+	else 
+		throw Exception("No such a variable in this scope.");
 }
 
 // implement ActRecManager

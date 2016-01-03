@@ -6,13 +6,13 @@
 #include <string>
 #include <iostream>
 #include <sstream>
-#include <stdio.h>
+#include <cstdio>
 
+#define UNDEFINED_TYPE -1
+#define NULL_TYPE 0
 #define INT_TYPE 1
 #define DOUBLE_TYPE 2
 #define STRING_TYPE 3
-#define UNDEFINED_TYPE -1
-#define NULL_TYPE 0
 
 using namespace std;
 
@@ -29,11 +29,15 @@ public:
 	bool toBool();
 	string toString();
 
-	VarValue operator+(const VarValue&);
-	VarValue operator-(const VarValue&);
-	VarValue operator*(const VarValue&);
-	VarValue operator/(const VarValue&);
-	VarValue operator%(const VarValue&);
+	// overload arithmetic operators
+	VarValue operator +(const VarValue&);
+	VarValue operator -(const VarValue&);
+	VarValue operator *(const VarValue&);
+	VarValue operator /(const VarValue&);
+	VarValue operator %(const VarValue&);
+	
+	// overload logical operators
+	bool operator ==(const VarValue&);
 
 private:
 	int valuetype;			// -1 for undefined, 0 for null, 1 for int, 2 for double, 3 for string
