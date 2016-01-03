@@ -6,6 +6,23 @@
 
 ActRecManager actRecManager;
 
+
+void Function::print(){
+	cerr<<"Function info :"<<endl;
+	cerr<<"name : "<<name<<endl;
+	cerr<<"content : "<<content<<endl;
+	cerr<<"arg : ";
+	for (int i=0;i<arg.size();i++)
+		cerr<<arg[i]<<" ";
+	cerr<<endl;
+	cerr<<"-------------------"<<endl;
+}
+
+
+
+
+
+
 // implement VarValue
 VarValue::VarValue() {
 	valuetype = UNDEFINED_TYPE;
@@ -309,6 +326,26 @@ int ActRec::getSize() {
 	return mapVar.size();
 }
 
+int ActRec::findFunc(const string &name){
+	for (int i=0;i<funcList.size();i++){
+		if (funcList[i].name==name) return i;
+	}
+	return -1;
+}
+void ActRec::addFunc(const Function &func){
+	int t=findFunc(func.name);
+	if (t>=0) funcList[t]=func;
+	else funcList.push_back(func);
+}
+Function ActRec::getFunc(const string &name){
+	int t=findFunc(name);
+	if (t>=0){
+		return funcList[t];
+	}
+	else throw Exception("No such a function \""+name+"\"."); 
+}
+
+
 void ActRec::addVar(string varName, VarValue val) {
 	mapVar[varName] = val;	
 }
@@ -327,6 +364,9 @@ VarValue* ActRec::getValuePointer(string varName) {
 		throw Exception("No such a variable in this scope.");
 }
 
+
+
+
 // implement ActRecManager
 int ActRecManager::getSize() {
 	return vecActRec.size();
@@ -344,6 +384,27 @@ bool ActRecManager::deleteAR() {
 	}
 	return res;
 }
+
+
+void ActRecManager::addFunc(const Function &func) {
+	top().addFunc(func);	
+}
+
+Function ActRecManager::getFunc(const string &name) {
+	int size = getSize();
+	Function func;
+	while (size--) {
+		try{
+			func = vecActRec[size].getFunc(name);
+			return func;
+		} catch (Exception e) {
+			continue;
+		}
+	}
+	throw Exception("No such a function \""+name+"()\".");
+}
+
+
 
 void ActRecManager::addVar(string varName, VarValue val) {
 	int size = getSize();
