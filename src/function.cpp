@@ -1,5 +1,6 @@
 #include "function.h"
 #include "interpreter.h"
+#include "calculator.h"
 
 void splitArgList(const string &argList,vector<string> &v){
 	char tmp[100];
@@ -37,13 +38,13 @@ VarValue callFunction(const string name, const string argList){
 	for (int i=0;i<func.arg.size();i++)
 		ar.addVar(func.arg[i]);
 	for (int i=0;i<arg.size();i++){
+		var=getExpResult(arg[i]);
 		if (i<func.arg.size()){
-			var=actRecManager.acquireValue(arg[i]);
 			ar.addVar(func.arg[i],var);
 		}
 		else{
 			char tmpName[100];
-			sprintf(tmpName,"argument[%d]",i);
+			sprintf(tmpName,"arguments[%d]",i);
 			ar.addVar(tmpName,var);
 		}
 	}
