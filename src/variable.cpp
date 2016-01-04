@@ -432,6 +432,44 @@ bool VarValue::operator <(const VarValue& x) {
 	}
 }
 
+bool VarValue::operator <=(const VarValue& x) {
+	if ( this->valuetype == STRING_TYPE && x.valuetype == STRING_TYPE ) {
+		return (this->str_value <= x.str_value);
+	} else {
+		double m, n;
+		stringstream ss;			
+		if ( this->valuetype == INT_TYPE )
+			m = this->int_value;
+		else if ( this->valuetype == DOUBLE_TYPE )
+			m = this->double_value;
+		else if ( this->valuetype == STRING_TYPE ) {
+			if ( hasDigit(this->str_value) ) {
+				ss << this->str_value;
+				ss >> m;
+			} else {
+				return false;
+			}
+		}
+		if ( x.valuetype == INT_TYPE )
+			n = x.int_value;
+		else if ( x.valuetype == DOUBLE_TYPE )
+			n = x.double_value;
+		else if ( x.valuetype == STRING_TYPE ) {
+			if ( hasDigit(x.str_value) ) {
+				ss << x.str_value;
+				ss >> n;
+			} else {
+				return false;
+			}
+		}
+		if ( m - n > eps ) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+}
+
 bool VarValue::operator >(const VarValue& x) {
 	if ( this->valuetype == STRING_TYPE && x.valuetype == STRING_TYPE ) {
 		return (this->str_value > x.str_value);
@@ -462,10 +500,48 @@ bool VarValue::operator >(const VarValue& x) {
 				return false;
 			}
 		}
-		if ( m - n > eps ) {
-			return true;
-		} else {
+		if ( n - m > eps ) {
 			return false;
+		} else {
+			return true;
+		}
+	}
+}
+
+bool VarValue::operator >=(const VarValue& x) {
+	if ( this->valuetype == STRING_TYPE && x.valuetype == STRING_TYPE ) {
+		return (this->str_value >= x.str_value);
+	} else {
+		double m, n;
+		stringstream ss;			
+		if ( this->valuetype == INT_TYPE )
+			m = this->int_value;
+		else if ( this->valuetype == DOUBLE_TYPE )
+			m = this->double_value;
+		else if ( this->valuetype == STRING_TYPE ) {
+			if ( hasDigit(this->str_value) ) {
+				ss << this->str_value;
+				ss >> m;
+			} else {
+				return false;
+			}
+		}
+		if ( x.valuetype == INT_TYPE )
+			n = x.int_value;
+		else if ( x.valuetype == DOUBLE_TYPE )
+			n = x.double_value;
+		else if ( x.valuetype == STRING_TYPE ) {
+			if ( hasDigit(x.str_value) ) {
+				ss << x.str_value;
+				ss >> n;
+			} else {
+				return false;
+			}
+		}
+		if ( n - n > eps ) {
+			return false;
+		} else {
+			return true;
 		}
 	}
 }
