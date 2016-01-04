@@ -45,9 +45,22 @@ public:
 	VarValue operator /(const VarValue&);
 	VarValue operator %(const VarValue&);
 	
+	// 
+	VarValue operator =(const VarValue&);
+	VarValue operator *=(const VarValue&);
+	VarValue operator /=(const VarValue&);
+	VarValue operator %=(const VarValue&);
+	VarValue operator -=(const VarValue&);
+	VarValue operator <<=(const VarValue&);
+	VarValue operator >>=(const VarValue&);
+
 	// overload logical operators
 	bool operator ==(const VarValue&);
+	bool operator !=(const VarValue&);
 	bool operator <(const VarValue&);
+	bool operator <=(const VarValue&);
+	bool operator >(const VarValue&);
+	bool operator >=(const VarValue&);
 
 private:
 	int valuetype;			// -1 for undefined, 0 for null, 1 for int, 2 for double, 3 for string

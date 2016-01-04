@@ -403,6 +403,57 @@
 	// cout << (str_c < str_d) << endl;
 	// cout << (str_f < str_g) << endl;
 
+
+	/* test > success! */
+/*
+	VarValue int_a(5);
+	VarValue int_b(4);
+	VarValue int_c(6);
+	VarValue int_d(10);
+
+	VarValue double_a(5.12);
+	VarValue double_b(5.12);
+	VarValue double_c(6.23);
+	VarValue double_d(10.00);
+
+
+	VarValue str_a("abc");
+	VarValue str_b("abc");
+	VarValue str_c("5");
+	VarValue str_d("5.00");
+	VarValue str_e("5.12");
+	VarValue str_f("d");
+
+		// INT > INT
+	cout << "INT > INT" << endl;
+	cout << (int_a > int_b) << endl;
+	cout << (int_a > int_c) << endl;
+		// INT > DOUBLE
+	cout << "INT > DOUBLE" << endl;
+	cout << (int_c > double_a) << endl;
+	cout << (int_d > double_d) << endl;
+		// INT > STRING
+	cout << "INT > STRING" << endl;
+	cout << (int_a > str_a) << endl;		
+	cout << (int_a > str_c) << endl;
+	cout << (int_d > str_d) << endl;
+		// DOUBLE > DOUBLE
+	cout << "DOUBLE > DOUBLE" << endl;
+	cout << (double_a > double_b) << endl;
+	cout << (double_d > double_a) << endl;
+		// DOUBLE > STRING
+	cout << "DOUBLE > STRING" << endl;
+	cout << (double_a > str_d) << endl;
+	cout << (double_a > str_e) << endl;
+		// STRING > STRING
+	cout << "STRING > STRING" << endl;
+	cout << (str_a > str_b) << endl;
+	cout << (str_a > str_c) << endl;
+	cout << (str_c > str_d) << endl;
+	cout << (str_a > str_f) << endl;
+*/
+
+
 // 	return 0;
 // }
 
