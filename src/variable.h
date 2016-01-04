@@ -44,13 +44,16 @@ public:
 	VarValue operator *(const VarValue&);
 	VarValue operator /(const VarValue&);
 	VarValue operator %(const VarValue&);
+	VarValue operator <<(const VarValue&);
+	VarValue operator >>(const VarValue&);
 	
-	// 
+	// overload assignment operators
 	VarValue operator =(const VarValue&);
+	VarValue operator +=(const VarValue&);
+	VarValue operator -=(const VarValue&);
 	VarValue operator *=(const VarValue&);
 	VarValue operator /=(const VarValue&);
 	VarValue operator %=(const VarValue&);
-	VarValue operator -=(const VarValue&);
 	VarValue operator <<=(const VarValue&);
 	VarValue operator >>=(const VarValue&);
 
