@@ -22,6 +22,17 @@ int main(int argc, char const *argv[])
 	actRecManager.deleteAR();
 	cerr<<"######################################"<<endl;
 	*/
+	
+	/*
+	actRecManager.insertAR(ActRec());
+	actRecManager.addVar("abc",Object());
+	actRecManager.setVarMember("abc","str",VarValue("**************Object***************"));
+	VarValue* vp=actRecManager.acquireValuePointer("abc");
+	((*vp)["str"])->print();
+	*((*vp)["str"])=VarValue("**************New Object***************");
+	((*vp)["str"])->print();
+	actRecManager.deleteAR();
+	*/
 	try{
 	    ifstream in("test.js");
 	    stringstream buffer;

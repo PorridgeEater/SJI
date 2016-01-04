@@ -1,8 +1,8 @@
-var a = 0 ;
-var b = 1 ;
-var c = 2 ;
-d = 1;
-var e;
+var n = 10 ;
+var c = 0;
+var a = c<n;
+print c<n;
+print a;
 
 var str="---------I'm a string--------------";
 print str;
@@ -23,10 +23,11 @@ g();
 f();
 
 function f(x){
-	print arguments[1];
+	print x;
 }
-f(12345,"********************hello*************************");
+f(12345);
 
+b=1;
 if ((b == 1)) {
 	print b;
 }
@@ -62,6 +63,4 @@ print b;
 print c;
 print n;
 print e;
-print i;
-print d;
 print add(a,b);

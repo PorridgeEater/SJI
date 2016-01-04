@@ -43,6 +43,18 @@ void Function::print(){
 	cerr<<"-------------------"<<endl;
 }
 
+
+void Object::addMember(const string& memName,const VarValue& var){
+	VarValue *pv = new VarValue();
+	*pv=var;
+	memberMap[memName]=pv;	
+}
+
+PVarValue Object::operator[](const string& name){
+	return memberMap[name];
+}
+
+
 // implement VarValue
 VarValue::VarValue() {
 	valuetype = UNDEFINED_TYPE;
@@ -61,6 +73,17 @@ VarValue::VarValue(double x) {
 VarValue::VarValue(string x) {
 	valuetype = STRING_TYPE;
 	str_value = x;
+}
+
+VarValue::VarValue(Object x){
+	valuetype=OBJECT_TYPE;
+	obj_value=x;
+}
+
+void VarValue::addMember(const string& name,const VarValue& val){
+	if (valuetype==OBJECT_TYPE) {
+		obj_value.addMember(name,val);
+	}
 }
 
 int VarValue::getValueType() {
@@ -127,6 +150,8 @@ string VarValue::toString() {
 		case STRING_TYPE:
 			return str_value;
 			break;
+		case OBJECT_TYPE:
+			return "I'm an object.";
 		default:
 			throw Exception("Invalid valuetype!");
 			break;
@@ -136,6 +161,11 @@ string VarValue::toString() {
 void VarValue::print() {
 	cout << "valuetype = " << valuetype << "\t";
 	cout << "value = " << toString() << endl;
+}
+
+PVarValue VarValue::operator[](const string& name){
+	if (valuetype!=OBJECT_TYPE) return NULL;
+	return obj_value[name];
 }
 
 VarValue VarValue::operator +(const VarValue& x) {
@@ -621,7 +651,7 @@ VarValue VarValue::operator >>(const VarValue& x) {
 		throw Exception("NaN Error");
 	}
 }
-
+/*
 VarValue VarValue::operator =(const VarValue& x) {
 	if ( x.valuetype == INT_TYPE )
 		return VarValue(x.int_value);
@@ -631,7 +661,7 @@ VarValue VarValue::operator =(const VarValue& x) {
 		return VarValue(x.str_value);
 	else 
 		return VarValue();
-}
+}*/
 
 VarValue VarValue::operator +=(const VarValue& x) {
 	string tmp;
@@ -1375,12 +1405,16 @@ Function ActRec::getFunc(const string &name){
 
 
 void ActRec::addVar(string varName, VarValue val) {
+	//cerr<<"addVar "<<varName<<endl;
 	mapVar[varName] = val;	
 }
 
 VarValue ActRec::getValue(string varName) {
-	if (mapVar.count(varName))
+	//cerr<<"getValue() "<<varName<<endl;
+	if (mapVar.count(varName)){
 		return mapVar[varName];
+		//cerr<<"has"<<endl;
+	}
 	else 
 		throw Exception("No such a variable in this scope.");
 }
@@ -1447,7 +1481,14 @@ void ActRecManager::setVar(string varName, VarValue val) {
 	addVar(varName, val);
 }
 
+void ActRecManager::setVarMember(string varName, string index, VarValue val) {
+	VarValue* vp= acquireValuePointer(varName);
+	vp->addMember(index,val);
+}
+
 void ActRecManager::addVar(string varName, VarValue val) {
+	//cerr<<"top().addVar "<<varName<<endl;
+	//cerr<<"len = "<<varName.length()<<endl;
 	top().addVar(varName, val);	
 }
 
