@@ -110,7 +110,7 @@ VarValue::VarValue() {
 }
 
 VarValue::VarValue(double x) {
-	if ( abs(x-(int)x) < eps ) {
+	if ( abs(x-(long long)x) < eps ) {
 		valuetype = INT_TYPE;
 		int_value = (long long)x;
 	} else {
