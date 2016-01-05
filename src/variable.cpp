@@ -239,7 +239,28 @@ VarValue VarValue::operator +(const VarValue& x) {
 	string tmp;
 	stringstream ss;
 
-	if ( this->valuetype == INT_TYPE ) {
+	if ( this->valuetype == UNDEFINED_TYPE ) {
+		switch ( x.valuetype ) {
+			case UNDEFINED_TYPE:
+				return VarValue(this->toString() + "undefined");
+				break;
+			case INT_TYPE:
+				ss << x.int_value;
+				ss >> tmp;
+				return VarValue(this->toString() + tmp);
+				break;
+			case DOUBLE_TYPE:
+				ss << x.double_value;
+				ss >> tmp;
+				return VarValue(this->toString() + tmp);
+				break;
+			case STRING_TYPE:
+				return VarValue(this->toString() + x.str_value);
+				break;
+			default:
+				break;
+		}
+	} else if ( this->valuetype == INT_TYPE ) {
 		switch ( x.valuetype ) {
 			case INT_TYPE:
 				return VarValue(this->int_value + x.int_value);
