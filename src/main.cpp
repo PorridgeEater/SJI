@@ -32,13 +32,13 @@ int main(int argc, char const *argv[])
 	cout<<"---------------------------------------"<<endl;
 	actRecManager.deleteAR();
 	*/
-	try{
-	    ifstream in("test.js");
-	    stringstream buffer;
-	    buffer << in.rdbuf();
-	    actRecManager.insertAR(ActRec());
-	    interpreter(buffer.str());
-	    actRecManager.deleteAR();
+	try {
+		ifstream in(argv[1]);
+		stringstream buffer;
+		buffer << in.rdbuf();
+		actRecManager.insertAR(ActRec());
+		interpreter(buffer.str());
+		actRecManager.deleteAR();
 	} catch (Exception e){
 		e.errMessage();
 	} catch (interrupt e) {
