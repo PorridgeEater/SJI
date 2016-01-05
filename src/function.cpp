@@ -25,9 +25,9 @@ void defineFunction(const string name, const string argList, const string conten
 }
 
 VarValue callFunction(const string name, const string argList){
-	cerr<<"################## callFunction"<<endl;
+	//cerr<<"################## callFunction"<<endl;
 	Function func = actRecManager.getFunc(name);
-	func.print();
+	//func.print();
 	ActRec ar;
 	vector<string> arg;
 	func_splitArgList(argList,arg);
