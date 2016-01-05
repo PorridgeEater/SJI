@@ -1,10 +1,17 @@
-function f(a) {
-	return 2;
-}
+x = 1;
+x.name = 1;
+print x;
+print x.name;
 
-a = [1, "1", f(1), {a:1, b:"1", c:f(1)}];
-b = [a, 1];
-a = [a, b];
-// b = [b, a];
-// a = [a, b];
-print a;
+print "";
+
+x = {
+	name : 1,
+	y : {
+		name : "2"
+	}
+};
+print x;
+print x.name;
+print x.y;
+print x.y.name;
