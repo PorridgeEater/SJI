@@ -350,12 +350,10 @@ VarValue VarValue::operator -(const VarValue& x) {
 					break;
 				case STRING_TYPE:
 					if ( allDigit(x.str_value) != -1 ) {
-						cout << "tmp=" << tmp << endl;
 						ss.clear();
 						ss.str("");
 						ss << x.str_value;
 						ss >> tmp2;
-						cout << "tmp2=" << tmp2 << endl;
 						return VarValue(tmp - tmp2);
 					} else {
 						throw Exception("NaN Error");
