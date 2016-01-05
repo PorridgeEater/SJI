@@ -1,5 +1,5 @@
 var n = 10 ;
-var c = 0; /* hhh
+var c = 0; /* hhh */
 var a = c<n;
 print c<n;
 print a; // 23333333
