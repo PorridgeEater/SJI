@@ -56,12 +56,13 @@ PVarValue Object::operator[](const string& name){
 
 string Object::toString(){
 	auto it=memberMap.begin();
-	cout<<"Object {";
-	cout<<it->first<<": "<<(it->second)->toString();
+	string ret;
+	ret+="Object {";
+	ret+=it->first+": "+(it->second)->toString();
 	for (++it;it!=memberMap.end();++it){
-		cout<<", "<<it->first<<": "<<(it->second)->toString();
+		ret+=", "+it->first+": "+(it->second)->toString();
 	}
-	cout<<"}";
+	return ret+="}";
 }
 
 

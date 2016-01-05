@@ -536,6 +536,23 @@ int main() {
 	// cout << endl;	
 
 	// getExpResult("  1+ 1 ").print();
-	// getExpResult("n = 1");
+	try {
+		actRecManager.insertAR(ActRec());
+		getExpResult(string("")
+			+ "d={"
+			+ "name:" + "\"1\","
+			+ "num:" + "1+2+3+4,"
+			+ "num2:" + "\"1\"+2+3+4"
+			+ "}").print();
+		getExpResult("d[\"name\"]").print();
+		getExpResult("d[\"num\"]").print();
+		getExpResult("d[\"num2\"]").print();
+		cout<<"---------------------------------------"<<endl;
+		actRecManager.deleteAR();
+	}
+	catch (Exception e) {
+		e.errMessage();
+	}
+
 	return 0;
 }
