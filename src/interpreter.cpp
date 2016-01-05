@@ -413,7 +413,14 @@ VarValue interpreter(string code)
         }
         else {
             string exp = e;
-            while (pos < code.length() && code[pos] != ';') {
+            int count = 0;
+            while (pos < code.length() && (count > 0 || code[pos] != ';')) {
+                if (code[pos] == '{') {
+                    count++;
+                }
+                if (code[pos] == '}') {
+                    count--;
+                }
                 exp += code[pos];
                 pos++;
             }
