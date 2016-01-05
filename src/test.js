@@ -7,9 +7,10 @@ print a; // 23333333
 	hahahsdfasdfasdfasdfsdf
 */
 // hhhhh
-d = 1;
+//d = 1;
 var e;
 
+print n;
 var str="---------I'm a string--------------";
 print str;
 print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~";

@@ -212,6 +212,7 @@ VarValue interpreter(string code)
                 pos++;
                 cout << "Name: " << name << endl;
                 cout << "Expression: " << exp << endl;
+                cout << "Expression Result: " << getExpResult(exp).toString() << endl;
                 actRecManager.addVar(name, getExpResult(exp));
             }
         }
@@ -272,6 +273,7 @@ VarValue interpreter(string code)
             if (pos >= code.length()) {
                 throw Exception("Missing ';'\n");
             }
+            pos++;
             getExpResult(exp);
             /*
             while (pos < code.length() && (code[pos] == ' ' || code[pos] == '\n' || code[pos] == 9)) {pos++;}
