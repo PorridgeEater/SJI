@@ -151,6 +151,8 @@ bool MyStream::hasNext() {
 	return p != expr.size();// && expr[p] != ';';
 }
 string MyStream::next() {
+	hasNext();
+	
 	string ret = "";
 
 	int type = nextType();
@@ -487,6 +489,7 @@ VarValue getExpResult(string expr) {
 
 	{
 		int d = expr.find("=");
+		// cout<<expr<<" haha1"<<endl;
 		if (in.nextType() == VARIABLE_TYPE) {
 		in.next();
 		string s = in.next();
@@ -502,6 +505,7 @@ VarValue getExpResult(string expr) {
 		}
 		}
 		in = MyStream(expr);
+		// cout<<expr<<" haha2\n";
 	}
 
 
