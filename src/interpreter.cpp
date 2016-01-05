@@ -72,7 +72,7 @@ static string getKey(string code, int &p)
 static void ifStatement(string condition, string content, string others) {
     actRecManager.insertAR(ActRec());
     VarValue result = getExpResult(condition);
-    //cout << "Result " << result.toString() << endl;
+    // cout << "Result " << result.toString() << endl;
     if (result.toBool()) {
         try {
             interpreter(content);
@@ -150,7 +150,7 @@ static void forStatement(string condition, string content) {
     
     int q = p;
     while (p < condition.length() && condition[p++] != ';') {}
-    string cond = condition.substr(q, p-q-2);
+    string cond = condition.substr(q, p-q-1);
     
     if (p >= condition.length()) {
         actRecManager.deleteAR();
@@ -280,7 +280,7 @@ VarValue interpreter(string code)
         if (e == "") {
             break;
         }
-        //cout << "Key: " << e  << "  Pos: " << pos << endl;
+        // cout << "Key: " << e  << "  Pos: " << pos << endl;
         //cout << code.substr(pos, code.length() - pos);
         if (e == "{") { }
         else if (e == "}") { }
@@ -365,9 +365,9 @@ VarValue interpreter(string code)
             string name = getKey(code, pos);
             string condition = getContent(code, pos, '(', ')');
             string content = getContent(code, pos, '{', '}');
-            //cout << "name: " << name << endl;
-            //cout << "condition: " << condition << endl;
-            //cout << "content: " << content << endl;
+            // cout << "name: " << name << endl;
+            // cout << "condition: " << condition << endl;
+            // cout << "content: " << content << endl;
             defineFunction(name, condition, content);
         }
         else if (e == "print") {
@@ -386,8 +386,8 @@ VarValue interpreter(string code)
                 exp += code[pos++];
             }
             pos++;
-            //cout << "return: " << exp << endl;
-            //cout << "Result: " << getExpResult(exp).toString() << endl;
+            // cout << "return: " << exp << endl;
+            // cout << "Result: " << getExpResult(exp).toString() << endl;
             throw getExpResult(exp);
         }
         else if (e == "/") {
