@@ -347,7 +347,8 @@ string MyStream::nextExpr() {
 		ret+=expr[p++];
 	}
 	hasNext();
-	if (expr[p]!='}') throw Exception("nextExpr: Unexpected token: 00" + expr[p]);
+	if (expr[p]!='}') throw Exception("nextExpr: Unexpected token: " + expr[p]);
+	return ret;
 }
 Object MyStream::nextObject() {
 	if (expr[p] != '{') throw Exception("Object definition failed.");
