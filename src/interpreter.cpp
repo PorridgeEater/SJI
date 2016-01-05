@@ -90,7 +90,7 @@ static void whileStatement(string condition, string content) {
         try {
             interpreter(content);
         } catch (interrupt e) {
-            cout << "break" << endl;
+            //cout << "break" << endl;
             break;
         } catch (Exception e) {
             throw e;
@@ -128,19 +128,19 @@ static void forStatement(string condition, string content) {
     string iter = condition.substr(t, condition.length()-t) + ";";
     
     
-    cout << "init:" << init << endl;
-    cout << "cond:" << cond << endl;
-    cout << "iter:" << iter << endl;
+    //cout << "init:" << init << endl;
+    //cout << "cond:" << cond << endl;
+    //cout << "iter:" << iter << endl;
     
     interpreter(init);
-    cout << condition << endl;
+    //cout << condition << endl;
     VarValue result = getExpResult(cond);
     while (result.toBool()) {
         actRecManager.insertAR(ActRec());
         try {
             interpreter(content);
         } catch (interrupt e) {
-            cout << "break" << endl;
+            //cout << "break" << endl;
             break;
         } catch (Exception e) {
             throw e;
@@ -156,7 +156,7 @@ static void forStatement(string condition, string content) {
 
 void switchStatement(string condition, string content) {
     VarValue result = getExpResult(condition);
-    cout << "Condition Result: " << result.toString() << endl;
+    //cout << "Condition Result: " << result.toString() << endl;
     int p = 0;
     vector<VarValue> labels;
     vector<string> contents;
@@ -168,7 +168,7 @@ void switchStatement(string condition, string content) {
         if (caseStatement == "default") {
             while (p < content.length() && content[p++] != ':') {}
             defaultContent = content.substr(p, content.length() - p);
-            cout << "default: " << defaultContent << endl;
+            //cout << "default: " << defaultContent << endl;
             break;
         }
         if (caseStatement != "case") {
@@ -203,7 +203,7 @@ void switchStatement(string condition, string content) {
         }
         contents.push_back(cont);
 
-        cout << "Label: " << label.toString() << " Content: " << cont << endl;
+        //cout << "Label: " << label.toString() << " Content: " << cont << endl;
     }
 
     actRecManager.insertAR(ActRec());
@@ -219,7 +219,7 @@ void switchStatement(string condition, string content) {
         }
         interpreter(defaultContent);
     } catch (interrupt e) {
-        cout << "break" << endl;
+        //cout << "break" << endl;
     } catch (Exception e) {
         throw e;
     }
@@ -236,7 +236,7 @@ VarValue interpreter(string code)
         if (e == "") {
             break;
         }
-        cout << "Key: " << e  << "  Pos: " << pos << endl;
+        //cout << "Key: " << e  << "  Pos: " << pos << endl;
         //cout << code.substr(pos, code.length() - pos);
         if (e == "{") { }
         else if (e == "}") { }
@@ -244,13 +244,13 @@ VarValue interpreter(string code)
             string condition = getContent(code, pos, '(', ')');
             string content = getContent(code, pos, '{', '}');
             
-            cout << "condition: " << condition << endl;
-            cout << "content: " << content << endl;
+            //cout << "condition: " << condition << endl;
+            //cout << "content: " << content << endl;
             
             int old = pos;
             string others = getKey(code, pos);
             if (others == "else") {
-                cout << "Key: else" << endl;
+                // cout << "Key: else" << endl;
                 string otherContent = "";
                 while (pos < code.length() && code[pos] != '{') {
                     otherContent += code[pos++];
@@ -268,22 +268,22 @@ VarValue interpreter(string code)
         else if (e == "while") {
             string condition = getContent(code, pos, '(', ')');
             string content = getContent(code, pos, '{', '}');
-            cout << "condition: " << condition << endl;
-            cout << "content: " << content << endl;
+            //cout << "condition: " << condition << endl;
+            //cout << "content: " << content << endl;
             whileStatement(condition, content);
         }
         else if (e == "for") {
             string condition = getContent(code, pos, '(', ')');
             string content = getContent(code, pos, '{', '}');
-            cout << "condition: " << condition << endl;
-            cout << "content: " << content << endl;
+            //cout << "condition: " << condition << endl;
+            //cout << "content: " << content << endl;
             forStatement(condition, content);
         }
         else if (e == "switch") {
             string condition = getContent(code, pos, '(', ')');
             string content = getContent(code, pos, '{', '}');
-            cout << "condition: " << condition << endl;
-            cout << "content: " << content << endl;
+            //cout << "condition: " << condition << endl;
+            //cout << "content: " << content << endl;
             switchStatement(condition, content);
         }
         else if (e == "continue") {
@@ -311,9 +311,9 @@ VarValue interpreter(string code)
                     throw Exception("Syntax Error after 'var'\n");
                 }
                 pos++;
-                cout << "Name: " << name << endl;
-                cout << "Expression: " << exp << endl;
-                cout << "Expression Result: " << getExpResult(exp).toString() << endl;
+                //cout << "Name: " << name << endl;
+                //cout << "Expression: " << exp << endl;
+                //cout << "Expression Result: " << getExpResult(exp).toString() << endl;
                 actRecManager.addVar(name, getExpResult(exp));
             }
         }
@@ -321,9 +321,9 @@ VarValue interpreter(string code)
             string name = getKey(code, pos);
             string condition = getContent(code, pos, '(', ')');
             string content = getContent(code, pos, '{', '}');
-            cout << "name: " << name << endl;
-            cout << "condition: " << condition << endl;
-            cout << "content: " << content << endl;
+            //cout << "name: " << name << endl;
+            //cout << "condition: " << condition << endl;
+            //cout << "content: " << content << endl;
             defineFunction(name, condition, content);
         }
         else if (e == "print") {
@@ -332,9 +332,9 @@ VarValue interpreter(string code)
                 exp += code[pos++];
             }
             pos++;
-            cout << "exp: " << exp << endl;
+            //cout << "exp: " << exp << endl;
             VarValue result = getExpResult(exp);
-            cout << result.toString();
+            cout << result.toString() << endl;
         }
         else if (e == "return") {
             string exp = "";
@@ -345,7 +345,7 @@ VarValue interpreter(string code)
             return getExpResult(exp);
         }
         else if (e == "/") {
-            cout << "Comment" << endl;
+            //cout << "Comment" << endl;
             //cout << pos << " " << code[pos] << endl;
             if (code[pos] == '*') {
                 bool right = false;
@@ -375,8 +375,9 @@ VarValue interpreter(string code)
                 throw Exception("Missing ';'\n");
             }
             pos++;
-            cout << "Expression: " << exp << endl;
-            cout << "Result: " << getExpResult(exp).toString() << endl;
+            //cout << "Expression: " << exp << endl;
+            //cout << "Result: " << getExpResult(exp).toString() << endl;
+            getExpResult(exp);
             /*
             while (pos < code.length() && (code[pos] == ' ' || code[pos] == '\n' || code[pos] == 9)) {pos++;}
             if (pos >= code.length()) {
@@ -414,7 +415,7 @@ VarValue interpreter(string code)
             }
             */
         }
-        cout << endl;
+        // cout << endl;
     }
     return VarValue();
 }
