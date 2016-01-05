@@ -535,6 +535,7 @@ int main() {
 	// receivevv.print();
 	// cout << endl;	
 
-	getExpResult("  1 1  ").print();
+	// getExpResult("  1+ 1 ").print();
+	// getExpResult("n = 1");
 	return 0;
 }
