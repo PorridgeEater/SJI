@@ -102,6 +102,18 @@ string Object::toString(){
 	ret = ret + "}";
 	return ret;
 }
+string Object::toString(bool array_type){
+	auto it=memberMap.begin();
+	string ret = "[";
+	if (it!=memberMap.end()){
+		ret = ret + (it->second)->toString();
+		for (++it;it!=memberMap.end();++it){
+			ret = ret + ", " + (it->second)->toString();
+		}
+	}
+	ret = ret + "]";
+	return ret;
+}
 
 
 // implement VarValue
@@ -127,6 +139,11 @@ VarValue::VarValue(string x) {
 VarValue::VarValue(Object x){
 	valuetype=OBJECT_TYPE;
 	obj_value=x;
+}
+VarValue::VarValue(Object x, bool array_type){
+	valuetype=OBJECT_TYPE;
+	obj_value=x;
+	this->array_type = 1;
 }
 
 VarValue::VarValue(Function x){
@@ -215,6 +232,7 @@ string VarValue::toString() {
 			return str_value;
 			break;
 		case OBJECT_TYPE:
+			if (array_type) return obj_value.toString(array_type);
 			return obj_value.toString();
 			break;
 		case FUNC_TYPE:

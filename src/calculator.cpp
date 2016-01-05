@@ -120,11 +120,12 @@ struct MyStream {
 	string _next();
 	int nextType();
 	bool hasExtraExp();
-	Object nextObject();
 	string nextVar();
-	string nextExpr();
+	string nextExpr(char left, char right);
 	void nextColon();
-	void nextComma();
+	void nextComma(char right);
+	Object nextObject();
+	Object nextArray();
 };
 
 struct NumOrOp {
@@ -264,9 +265,10 @@ string MyStream::next() {
 		for (; p<expr.size() && (isCharacter(expr[p]) || isDigit(expr[p])); ret+=expr[p++]);
 		return ret;
 	}
+	return "";
 }
 int MyStream::nextType() {
-	if (expr[p] == '(' || expr[p] == '{') return LEFT_BRACKET_TYPE;
+	if (expr[p] == '(' || expr[p] == '{' || expr[p] == '[') return LEFT_BRACKET_TYPE;
 	if (expr[p] == ')') return RIGHT_BRACKET_TYPE;
 
 	/*  字符串  */
@@ -332,11 +334,11 @@ void MyStream::nextColon() {
 	if (expr[p]==':') p++;
 	else throw Exception((string)"nextColon2: Unexpected token: " + expr[p]);
 }
-void MyStream::nextComma() {
-	for (; p<expr.size() && expr[p]!=',' && expr[p]!='}'; p++)
+void MyStream::nextComma(char right) {
+	for (; p<expr.size() && expr[p]!=',' && expr[p]!=right; p++)
 		if (!isSpace(expr[p])) throw Exception((string)"nextComma1: Unexpected token: " + expr[p]);
 	if (expr[p] == ',') p++;
-	else if (expr[p] == '}') ;
+	else if (expr[p] == right) ;
 	else throw Exception((string)"nextComma2: Unexpected token: " + expr[p]);
 }
 string MyStream::nextVar() {
@@ -344,7 +346,7 @@ string MyStream::nextVar() {
 	for (; p<expr.size() && (isCharacter(expr[p]) || isDigit(expr[p])); ret+=expr[p++]);
 	return ret;
 }
-string MyStream::nextExpr() {
+string MyStream::nextExpr(char left, char right) {
 	bool ins0 = 0, ins1 = 0;
 	string ret = "";
 
@@ -360,19 +362,18 @@ string MyStream::nextExpr() {
 		}
 		if (ins0 || ins1) { ret+=expr[p++]; continue; }  //如果在字符串内，那么直接加上这个字符就好
 
-		if (expr[p] == '{') bn++;
-		if (expr[p] == '}') bn--;
-		if (expr[p] == ',' || (expr[p] == '}'&&bn==-1)) return ret;
+		if (expr[p] == left) bn++;
+		if (expr[p] == right) bn--;
+		if (expr[p] == ',' || (expr[p] == right && bn == -1)) return ret;
 		ret+=expr[p++];
 	}
 	hasNext();
-	if (expr[p]!='}') throw Exception((string)"nextExpr: Unexpected token: " + ret+expr[p]+expr);
+	if (expr[p]!=right) throw Exception((string)"nextExpr: Unexpected token: " + ret+expr[p]+expr);
 	return ret;
 }
 Object MyStream::nextObject() {
 	if (expr[p] != '{') throw Exception((string)"Object definition failed.");
 	next();
-	// cout<<expr<<endl;
 	Object ret;
 	while (hasNext() && _next() != "}") {
 		// cout<<nextType()<<endl;
@@ -380,10 +381,28 @@ Object MyStream::nextObject() {
 		if (nextType() != VARIABLE_TYPE) throw Exception("nextObject: Unexpected token: " + next() + ".");
 		string var = nextVar();
 		nextColon();
-		ret.addMember(var, getExpResult(nextExpr()));
-		nextComma();
+		ret.addMember(var, getExpResult(nextExpr('{','}')));
+		nextComma('}');
 	}
 	if (!hasNext() || _next() != "}") throw Exception("\"}\" Expected.");
+	next();
+	// VarValue(ret).print();
+	// VarValue(ret)["name"]->print();
+	return ret;
+}
+Object MyStream::nextArray() {
+	if (expr[p] != '[') throw Exception((string)"Array definition failed.");
+	next();
+	Object ret;
+	for (int i=0; hasNext() && _next() != "]"; i++) {
+		if (nextType() != VARIABLE_TYPE && nextType() != NUMBER_TYPE && nextType() != STRING_TYPE2 && nextType() != FUNCTION_TYPE && nextType() != LEFT_BRACKET_TYPE)
+			throw Exception("nextArray: Unexpected token: " + next() + ".");
+
+		stringstream ss; ss<<i; string var; ss>>var;
+		ret.addMember(var, getExpResult(nextExpr('[',']')));
+		nextComma(']');
+	}
+	if (!hasNext() || _next() != "]") throw Exception("\"]\" Expected.");
 	next();
 	// VarValue(ret).print();
 	// VarValue(ret)["name"]->print();
@@ -496,14 +515,6 @@ static VarValue calSuffix(const vector<NumOrOp> &suf) {
 
 /*  用于获取表达式值的函数。若表达式有错会返回UNDEFINED。(没有处理空格)  */
 VarValue getExpResult(string expr) {
-	// if (expr.size() == 0) {
-	// 	ret.valuetype = -1;
-	// 	return ret;
-	// }
-
-	// puts("!!!!!!!!!!!!!");
-	// cout<<expr<<endl;
-
 	vector<NumOrOp> suf;
 	// vector<char> ops;
 	vector<Operator> ops;
@@ -542,6 +553,9 @@ VarValue getExpResult(string expr) {
 
 		if (type == LEFT_BRACKET_TYPE && in._next() == "{") {
 			suf.push_back(NumOrOp( VarValue(in.nextObject()) ));
+		}
+		else if (type == LEFT_BRACKET_TYPE && in._next() == "[") {
+			suf.push_back(NumOrOp( VarValue(in.nextArray(), 1) ));
 		}
 		else if (type == OPERATOR_TYPE || type == LEFT_BRACKET_TYPE || type == RIGHT_BRACKET_TYPE) {
 			Operator c = in.next();
@@ -595,8 +609,6 @@ VarValue getExpResult(string expr) {
 			// puts("haha");
 		}
 		else if (type == FUNCTION_TYPE) {
-
-			//要加上f(1)[2]之类情况的判断??
 			string s = in.next();
 			int _t = s[0]-48; s=s.substr(2, s.size()-2);
 			int d = s.find(" ");

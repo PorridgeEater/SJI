@@ -38,6 +38,7 @@ public:
 	void addMember(const string& memName,const VarValue& var);
 	PVarValue operator[](const string& name);
 	string toString();
+	string toString(bool array_type);
 };
 
 
@@ -50,11 +51,14 @@ private:
 	Object obj_value;
 	Function func_value;
 
+	bool array_type = 0;
+
 public:
 	VarValue();
 	VarValue(double);
 	VarValue(string);
 	VarValue(Object);
+	VarValue(Object, bool array_type);
 	VarValue(Function);
 	int getValueType();
 	long long getIntValue();
