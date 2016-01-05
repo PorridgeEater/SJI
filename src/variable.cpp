@@ -6,6 +6,31 @@
 
 ActRecManager actRecManager;
 
+inline bool hasDigit(string s) {
+	for ( int i=0, len=s.length(); i<len; i++ ) {
+		if ( s[i]>='0' && s[i]<='9' )
+			return true;
+	}
+	return false;
+}
+
+inline int allDigit(string s) {
+	int dot;
+	dot = 0;
+	for ( int i=0, len=s.length(); i<len; i++ ) {
+		if ( s[i] == '.' ) {
+			dot++;
+			if ( dot > 1 )
+				return -1;
+		} else if ( s[i]<'0' || s[i]>'9' ) {
+			return -1;
+		}
+	}
+	if ( dot == 0 )
+		return 0;
+	else if ( dot == 1 )
+		return 1;
+}
 
 void Function::print(){
 	cerr<<"Function info :"<<endl;
@@ -17,6 +42,28 @@ void Function::print(){
 	cerr<<endl;
 	cerr<<"-------------------"<<endl;
 }
+
+
+void Object::addMember(const string& memName,const VarValue& var){
+	VarValue *pv = new VarValue();
+	*pv=var;
+	memberMap[memName]=pv;	
+}
+
+PVarValue Object::operator[](const string& name){
+	return memberMap[name];
+}
+
+string Object::toString(){
+	auto it=memberMap.begin();
+	cout<<"Object {";
+	cout<<it->first<<": "<<(it->second)->toString();
+	for (++it;it!=memberMap.end();++it){
+		cout<<", "<<it->first<<": "<<(it->second)->toString();
+	}
+	cout<<"}";
+}
+
 
 // implement VarValue
 VarValue::VarValue() {
@@ -36,6 +83,17 @@ VarValue::VarValue(double x) {
 VarValue::VarValue(string x) {
 	valuetype = STRING_TYPE;
 	str_value = x;
+}
+
+VarValue::VarValue(Object x){
+	valuetype=OBJECT_TYPE;
+	obj_value=x;
+}
+
+void VarValue::addMember(const string& name,const VarValue& val){
+	if (valuetype==OBJECT_TYPE) {
+		obj_value.addMember(name,val);
+	}
 }
 
 int VarValue::getValueType() {
@@ -68,6 +126,9 @@ bool VarValue::toBool() {
 			break;
 		case STRING_TYPE:
 			return str_value.length()!=0;
+			break;
+		case OBJECT_TYPE:
+			return true;
 			break;
 		default:
 			throw Exception("invalid valuetype!");
@@ -102,6 +163,9 @@ string VarValue::toString() {
 		case STRING_TYPE:
 			return str_value;
 			break;
+		case OBJECT_TYPE:
+			return obj_value.toString();
+			break;
 		default:
 			throw Exception("Invalid valuetype!");
 			break;
@@ -111,6 +175,13 @@ string VarValue::toString() {
 void VarValue::print() {
 	cout << "valuetype = " << valuetype << "\t";
 	cout << "value = " << toString() << endl;
+}
+
+PVarValue VarValue::operator[](const string& name){
+	if (valuetype!=OBJECT_TYPE){
+		obj_value.addMember(name,VarValue());
+	};
+	return obj_value[name];
 }
 
 VarValue VarValue::operator +(const VarValue& x) {
@@ -151,13 +222,13 @@ VarValue VarValue::operator +(const VarValue& x) {
 		}
 	} else if ( this->valuetype == STRING_TYPE ) {
 		switch ( x.valuetype ) {
-			case 1:
+			case INT_TYPE:
 				ss << x.int_value;
 				break;
-			case 2:
+			case DOUBLE_TYPE:
 				ss << x.double_value;
 				break;
-			case 3:
+			case STRING_TYPE:
 				return VarValue(this->str_value + x.str_value);
 				break;
 			default:
@@ -171,6 +242,10 @@ VarValue VarValue::operator +(const VarValue& x) {
 }
 
 VarValue VarValue::operator -(const VarValue& x) {
+	double tmp;
+	double tmp2;
+	stringstream ss;
+
 	if ( this->valuetype == INT_TYPE ) {
 		switch ( x.valuetype ) {
 			case INT_TYPE:
@@ -178,6 +253,15 @@ VarValue VarValue::operator -(const VarValue& x) {
 				break;
 			case DOUBLE_TYPE:
 				return VarValue(this->int_value - x.double_value);
+				break;
+			case STRING_TYPE:
+				if ( allDigit(x.str_value) != -1 ) {
+					ss << x.str_value;
+					ss >> tmp;
+					return VarValue(this->int_value - tmp);
+				} else {
+					throw Exception("NaN Error");
+				}
 				break;
 			default:
 				break;
@@ -190,8 +274,43 @@ VarValue VarValue::operator -(const VarValue& x) {
 			case DOUBLE_TYPE:
 				return VarValue(this->double_value - x.double_value);
 				break;
+			case STRING_TYPE:
+				if ( allDigit(x.str_value) != -1 ) {
+					ss << x.str_value;
+					ss >> tmp;
+					return VarValue(this->int_value - tmp);
+				} else {
+					throw Exception("NaN Error");
+				}
+				break;
 			default:
 				break;
+		}
+	} else if ( this->valuetype == STRING_TYPE ) {
+		if ( allDigit(this->str_value) != -1 ) {
+			ss << this->str_value;
+			ss >> tmp;
+			switch ( x.valuetype ) {
+				case INT_TYPE:
+					return VarValue(tmp - x.int_value);
+					break;
+				case DOUBLE_TYPE:
+					return VarValue(tmp - x.double_value);
+					break;
+				case STRING_TYPE:
+					if ( allDigit(x.str_value) != -1 ) {
+						ss << x.str_value;
+						ss >> tmp2;
+						return VarValue(tmp - tmp2);
+					} else {
+						throw Exception("NaN Error");
+					}
+					break;
+				default:
+					break;
+			}
+		} else {
+			throw Exception("NaN Error");
 		}
 	} else {
 		throw Exception("invalid valuetype for -");
@@ -199,6 +318,10 @@ VarValue VarValue::operator -(const VarValue& x) {
 }
 
 VarValue VarValue::operator *(const VarValue& x) {
+	double tmp;
+	double tmp2;
+	stringstream ss;
+
 	if ( this->valuetype == INT_TYPE ) {
 		switch ( x.valuetype ) {
 			case INT_TYPE:
@@ -206,6 +329,15 @@ VarValue VarValue::operator *(const VarValue& x) {
 				break;
 			case DOUBLE_TYPE:
 				return VarValue(this->int_value * x.double_value);
+				break;
+			case STRING_TYPE:
+				if ( allDigit(x.str_value) != -1 ) {
+					ss << x.str_value;
+					ss >> tmp;
+					return VarValue(this->int_value * tmp);
+				} else {
+					throw Exception("NaN Error");
+				}
 				break;
 			default:
 				break;
@@ -218,8 +350,43 @@ VarValue VarValue::operator *(const VarValue& x) {
 			case DOUBLE_TYPE:
 				return VarValue(this->double_value * x.double_value);
 				break;
+			case STRING_TYPE:
+				if ( allDigit(x.str_value) != -1 ) {
+						ss << x.str_value;
+						ss >> tmp;
+						return VarValue(this->int_value * tmp);
+				} else {
+					throw Exception("NaN Error");
+				}
+				break;
 			default:
 				break;
+		}
+	} else if ( this->valuetype == STRING_TYPE ) {
+		if ( allDigit(this->str_value) != -1 ) {
+			ss << this->str_value;
+			ss >> tmp;
+			switch ( x.valuetype ) {
+				case INT_TYPE:
+					return VarValue(tmp * x.int_value);
+					break;
+				case DOUBLE_TYPE:
+					return VarValue(tmp * x.double_value);
+					break;
+				case STRING_TYPE:
+					if ( allDigit(x.str_value) != -1 ) {
+						ss << x.str_value;
+						ss >> tmp2;
+						return VarValue(tmp * tmp2);
+					} else {
+						throw Exception("NaN Error");
+					}
+					break;
+				default:
+					break;
+			}
+		} else {
+			throw Exception("NaN Error");
 		}
 	} else {
 		throw Exception("invalid valuetype for *");
@@ -227,6 +394,10 @@ VarValue VarValue::operator *(const VarValue& x) {
 }
 
 VarValue VarValue::operator /(const VarValue& x) {
+	double tmp;
+	double tmp2;
+	stringstream ss;
+
 	if ( this->valuetype == INT_TYPE ) {
 		switch ( x.valuetype ) {
 			case INT_TYPE:
@@ -234,6 +405,15 @@ VarValue VarValue::operator /(const VarValue& x) {
 				break;
 			case DOUBLE_TYPE:
 				return VarValue(this->int_value / x.double_value);
+				break;
+			case STRING_TYPE:
+				if ( allDigit(x.str_value) != -1 ) {
+					ss << x.str_value;
+					ss >> tmp;
+					return VarValue(this->int_value / tmp);
+				} else {
+					throw Exception("NaN Error");
+				}
 				break;
 			default:
 				break;
@@ -246,8 +426,43 @@ VarValue VarValue::operator /(const VarValue& x) {
 			case DOUBLE_TYPE:
 				return VarValue(this->double_value / x.double_value);
 				break;
+			case STRING_TYPE:
+				if ( allDigit(x.str_value) != -1 ) {
+					ss << x.str_value;
+					ss >> tmp;
+					return VarValue(this->int_value / tmp);
+				} else {
+					throw Exception("NaN Error");
+				}
+				break;
 			default:
 				break;
+		}
+	} else if ( this->valuetype == STRING_TYPE ) {
+		if ( allDigit(this->str_value) != -1 ) {
+			ss << this->str_value;
+			ss >> tmp;
+			switch ( x.valuetype ) {
+				case INT_TYPE:
+					return VarValue(tmp * x.int_value);
+					break;
+				case DOUBLE_TYPE:
+					return VarValue(tmp * x.double_value);
+					break;
+				case STRING_TYPE:
+					if ( allDigit(x.str_value) != -1 ) {
+						ss << x.str_value;
+						ss >> tmp2;
+						return VarValue(tmp / tmp2);
+					} else {
+						throw Exception("NaN Error");
+					}
+					break;
+				default:
+					break;
+			}
+		} else {
+			throw Exception("NaN Error");
 		}
 	} else {
 		throw Exception("invalid valuetype for /");
@@ -255,6 +470,12 @@ VarValue VarValue::operator /(const VarValue& x) {
 }
 
 VarValue VarValue::operator %(const VarValue& x) {
+	int int_tmp;
+	int int_tmp2;
+	double tmp;
+	double tmp2;
+	stringstream ss;
+
 	if ( this->valuetype == INT_TYPE ) {
 		switch ( x.valuetype ) {
 			case INT_TYPE:
@@ -262,6 +483,20 @@ VarValue VarValue::operator %(const VarValue& x) {
 				break;
 			case DOUBLE_TYPE:
 				return VarValue(fmod(this->int_value, x.double_value));
+				break;
+			case STRING_TYPE:
+				if ( allDigit(x.str_value) != -1 ) {
+					ss << x.str_value;
+					if ( allDigit(x.str_value) == 0 ) {
+						ss >> int_tmp;
+						return VarValue(this->int_value % int_tmp);
+					} else if ( allDigit(x.str_value) == 1 ) {
+						ss >> tmp;
+						return VarValue(fmod(this->int_value, tmp));
+					}
+				} else {
+					throw Exception("NaN Error");
+				}
 				break;
 			default:
 				break;
@@ -274,13 +509,661 @@ VarValue VarValue::operator %(const VarValue& x) {
 			case DOUBLE_TYPE:
 				return VarValue(fmod(this->double_value, x.double_value));
 				break;
+			case STRING_TYPE:
+				if ( allDigit(x.str_value) != -1 ) {
+					ss << x.str_value;
+					ss >> tmp;
+					return VarValue(fmod(this->int_value, tmp));
+				} else {
+					throw Exception("NaN Error");
+				}
+				break;
 			default:
 				break;
+		}
+	} else if ( this->valuetype == STRING_TYPE ) {
+		if ( allDigit(this->str_value) != -1 && allDigit(x.str_value) != -1 ) {
+			if ( allDigit(this->str_value) == 0 && allDigit(x.str_value) == 0 ) {
+				ss << this->str_value;
+				ss >> int_tmp;
+				ss << x.str_value;
+				ss >> int_tmp2;
+				return VarValue(int_tmp % int_tmp2);
+			} else {
+				ss << this->str_value;
+				ss >> tmp;
+				ss << x.str_value;
+				ss >> tmp2;
+				return VarValue(fmod(tmp, tmp2));
+			}
+		} else {
+			throw Exception("NaN Error");
 		}
 	} else {
 		throw Exception("invalid valuetype for \%");
 	}
 }
+
+VarValue VarValue::operator <<(const VarValue& x) {
+	int int_tmp;
+	int int_tmp2;
+	stringstream ss;
+
+	if ( this->valuetype == INT_TYPE ) {
+		switch ( x.valuetype ) {
+			case INT_TYPE:
+				return VarValue(this->int_value << x.int_value);
+				break;
+			case DOUBLE_TYPE:
+				return VarValue(this->int_value << (int)x.double_value);
+				break;
+			case STRING_TYPE:
+				if ( allDigit(x.str_value) != -1 ) {
+					ss << x.str_value;
+					ss >> int_tmp;
+					return VarValue(this->int_value << int_tmp);
+				} else {
+					// if str_value contains letters, the result will be 0
+					return VarValue();
+				}
+				break;
+			default:
+				break;
+		}
+	} else if ( this->valuetype == DOUBLE_TYPE ) {
+		switch ( x.valuetype ) {
+			case INT_TYPE:
+				return VarValue((int)this->double_value << x.int_value);
+				break;
+			case DOUBLE_TYPE:
+				return VarValue((int)this->double_value << (int)x.double_value);
+				break;
+			case STRING_TYPE:
+				if ( allDigit(x.str_value) != -1 ) {
+					ss << x.str_value;
+					ss >> int_tmp;
+					return VarValue((int)this->double_value << (int)int_tmp);
+				} else {
+					// if str_value contains letters, the result will be 0
+					return VarValue();
+				}
+				break;
+			default:
+				break;
+		}
+	} else if ( this->valuetype == STRING_TYPE ) {
+		if ( allDigit(this->str_value) != -1 && allDigit(x.str_value) != -1 ) {
+			ss << this->str_value;
+			ss >> int_tmp;
+			ss << x.str_value;
+			ss >> int_tmp2;
+			return VarValue(int_tmp << int_tmp2);
+		} else {
+			return VarValue();
+		}
+	} else {
+		throw Exception("NaN Error");
+	}
+}
+
+VarValue VarValue::operator >>(const VarValue& x) {
+	int int_tmp;
+	int int_tmp2;
+	stringstream ss;
+
+	if ( this->valuetype == INT_TYPE ) {
+		switch ( x.valuetype ) {
+			case INT_TYPE:
+				return VarValue(this->int_value >> x.int_value);
+				break;
+			case DOUBLE_TYPE:
+				return VarValue(this->int_value >> (int)x.double_value);
+				break;
+			case STRING_TYPE:
+				if ( allDigit(x.str_value) != -1 ) {
+					ss << x.str_value;
+					ss >> int_tmp;
+					return VarValue(this->int_value >> int_tmp);
+				} else {
+					// if str_value contains letters, the result will be 0
+					return VarValue();
+				}
+				break;
+			default:
+				break;
+		}
+	} else if ( this->valuetype == DOUBLE_TYPE ) {
+		switch ( x.valuetype ) {
+			case INT_TYPE:
+				return VarValue((int)this->double_value >> x.int_value);
+				break;
+			case DOUBLE_TYPE:
+				return VarValue((int)this->double_value >> (int)x.double_value);
+				break;
+			case STRING_TYPE:
+				if ( allDigit(x.str_value) != -1 ) {
+					ss << x.str_value;
+					ss >> int_tmp;
+					return VarValue((int)this->double_value >> (int)int_tmp);
+				} else {
+					// if str_value contains letters, the result will be 0
+					return VarValue();
+				}
+				break;
+			default:
+				break;
+		}
+	} else if ( this->valuetype == STRING_TYPE ) {
+		if ( allDigit(this->str_value) != -1 && allDigit(x.str_value) != -1 ) {
+			ss << this->str_value;
+			ss >> int_tmp;
+			ss << x.str_value;
+			ss >> int_tmp2;
+			return VarValue(int_tmp >> int_tmp2);
+		} else {
+			return VarValue();
+		}
+	} else {
+		throw Exception("NaN Error");
+	}
+}
+/*
+VarValue VarValue::operator =(const VarValue& x) {
+	if ( x.valuetype == INT_TYPE )
+		return VarValue(x.int_value);
+	else if ( x.valuetype == DOUBLE_TYPE )
+		return VarValue(x.double_value);
+	else if ( x.valuetype == STRING_TYPE )
+		return VarValue(x.str_value);
+	else 
+		return VarValue();
+}*/
+
+VarValue VarValue::operator +=(const VarValue& x) {
+	string tmp;
+	stringstream ss;
+
+	if ( this->valuetype == INT_TYPE ) {
+		switch ( x.valuetype ) {
+			case INT_TYPE:
+				return VarValue(this->int_value + x.int_value);
+				break;
+			case DOUBLE_TYPE:
+				return VarValue(this->int_value + x.double_value);
+				break;
+			case STRING_TYPE:
+				ss << this->int_value;
+				ss >> tmp;
+				return VarValue(tmp + x.str_value);
+				break;
+			default:
+				break;
+		}
+	} else if ( this->valuetype == DOUBLE_TYPE ) {
+		switch ( x.valuetype ) {
+			case INT_TYPE:
+				return VarValue(this->double_value + x.int_value);
+				break;
+			case DOUBLE_TYPE:
+				return VarValue(this->double_value + x.double_value);
+				break;
+			case STRING_TYPE:
+				ss << this->double_value;
+				ss >> tmp;
+				return VarValue(tmp + x.str_value);
+				break;
+			default:
+				break;
+		}
+	} else if ( this->valuetype == STRING_TYPE ) {
+		switch ( x.valuetype ) {
+			case INT_TYPE:
+				ss << x.int_value;
+				break;
+			case DOUBLE_TYPE:
+				ss << x.double_value;
+				break;
+			case STRING_TYPE:
+				return VarValue(this->str_value + x.str_value);
+				break;
+			default:
+				break;
+		}
+		ss >> tmp;
+		return VarValue(this->str_value + tmp);
+	} else {
+		throw Exception("invalid valuetype for +");
+	}
+}
+
+VarValue VarValue::operator -=(const VarValue& x) {
+	double tmp;
+	double tmp2;
+	stringstream ss;
+
+	if ( this->valuetype == INT_TYPE ) {
+		switch ( x.valuetype ) {
+			case INT_TYPE:
+				return VarValue(this->int_value - x.int_value);
+				break;
+			case DOUBLE_TYPE:
+				return VarValue(this->int_value - x.double_value);
+				break;
+			case STRING_TYPE:
+				if ( allDigit(x.str_value) != -1 ) {
+					ss << x.str_value;
+					ss >> tmp;
+					return VarValue(this->int_value - tmp);
+				} else {
+					throw Exception("NaN Error");
+				}
+				break;
+			default:
+				break;
+		}
+	} else if ( this->valuetype == DOUBLE_TYPE ) {
+		switch ( x.valuetype ) {
+			case INT_TYPE:
+				return VarValue(this->double_value - x.int_value);
+				break;
+			case DOUBLE_TYPE:
+				return VarValue(this->double_value - x.double_value);
+				break;
+			case STRING_TYPE:
+				if ( allDigit(x.str_value) != -1 ) {
+					ss << x.str_value;
+					ss >> tmp;
+					return VarValue(this->int_value - tmp);
+				} else {
+					throw Exception("NaN Error");
+				}
+				break;
+			default:
+				break;
+		}
+	} else if ( this->valuetype == STRING_TYPE ) {
+		if ( allDigit(this->str_value) != -1 ) {
+			ss << this->str_value;
+			ss >> tmp;
+			switch ( x.valuetype ) {
+				case INT_TYPE:
+					return VarValue(tmp - x.int_value);
+					break;
+				case DOUBLE_TYPE:
+					return VarValue(tmp - x.double_value);
+					break;
+				case STRING_TYPE:
+					if ( allDigit(x.str_value) != -1 ) {
+						ss << x.str_value;
+						ss >> tmp2;
+						return VarValue(tmp - tmp2);
+					} else {
+						throw Exception("NaN Error");
+					}
+					break;
+				default:
+					break;
+			}
+		} else {
+			throw Exception("NaN Error");
+		}
+	} else {
+		throw Exception("invalid valuetype for -");
+	}
+}
+
+VarValue VarValue::operator *=(const VarValue& x) {
+	double tmp;
+	double tmp2;
+	stringstream ss;
+
+	if ( this->valuetype == INT_TYPE ) {
+		switch ( x.valuetype ) {
+			case INT_TYPE:
+				return VarValue(this->int_value * x.int_value);
+				break;
+			case DOUBLE_TYPE:
+				return VarValue(this->int_value * x.double_value);
+				break;
+			case STRING_TYPE:
+				if ( allDigit(x.str_value) != -1 ) {
+					ss << x.str_value;
+					ss >> tmp;
+					return VarValue(this->int_value * tmp);
+				} else {
+					throw Exception("NaN Error");
+				}
+				break;
+			default:
+				break;
+		}
+	} else if ( this->valuetype == DOUBLE_TYPE ) {
+		switch ( x.valuetype ) {
+			case INT_TYPE:
+				return VarValue(this->double_value * x.int_value);
+				break;
+			case DOUBLE_TYPE:
+				return VarValue(this->double_value * x.double_value);
+				break;
+			case STRING_TYPE:
+				if ( allDigit(x.str_value) != -1 ) {
+						ss << x.str_value;
+						ss >> tmp;
+						return VarValue(this->int_value * tmp);
+				} else {
+					throw Exception("NaN Error");
+				}
+				break;
+			default:
+				break;
+		}
+	} else if ( this->valuetype == STRING_TYPE ) {
+		if ( allDigit(this->str_value) != -1 ) {
+			ss << this->str_value;
+			ss >> tmp;
+			switch ( x.valuetype ) {
+				case INT_TYPE:
+					return VarValue(tmp * x.int_value);
+					break;
+				case DOUBLE_TYPE:
+					return VarValue(tmp * x.double_value);
+					break;
+				case STRING_TYPE:
+					if ( allDigit(x.str_value) != -1 ) {
+						ss << x.str_value;
+						ss >> tmp2;
+						return VarValue(tmp * tmp2);
+					} else {
+						throw Exception("NaN Error");
+					}
+					break;
+				default:
+					break;
+			}
+		} else {
+			throw Exception("NaN Error");
+		}
+	} else {
+		throw Exception("invalid valuetype for *");
+	}
+}
+
+VarValue VarValue::operator /=(const VarValue& x) {
+	double tmp;
+	double tmp2;
+	stringstream ss;
+
+	if ( this->valuetype == INT_TYPE ) {
+		switch ( x.valuetype ) {
+			case INT_TYPE:
+				return VarValue(double(this->int_value) / x.int_value);
+				break;
+			case DOUBLE_TYPE:
+				return VarValue(this->int_value / x.double_value);
+				break;
+			case STRING_TYPE:
+				if ( allDigit(x.str_value) != -1 ) {
+					ss << x.str_value;
+					ss >> tmp;
+					return VarValue(this->int_value / tmp);
+				} else {
+					throw Exception("NaN Error");
+				}
+				break;
+			default:
+				break;
+		}
+	} else if ( this->valuetype == DOUBLE_TYPE ) {
+		switch ( x.valuetype ) {
+			case INT_TYPE:
+				return VarValue(this->double_value / x.int_value);
+				break;
+			case DOUBLE_TYPE:
+				return VarValue(this->double_value / x.double_value);
+				break;
+			case STRING_TYPE:
+				if ( allDigit(x.str_value) != -1 ) {
+					ss << x.str_value;
+					ss >> tmp;
+					return VarValue(this->int_value / tmp);
+				} else {
+					throw Exception("NaN Error");
+				}
+				break;
+			default:
+				break;
+		}
+	} else if ( this->valuetype == STRING_TYPE ) {
+		if ( allDigit(this->str_value) != -1 ) {
+			ss << this->str_value;
+			ss >> tmp;
+			switch ( x.valuetype ) {
+				case INT_TYPE:
+					return VarValue(tmp * x.int_value);
+					break;
+				case DOUBLE_TYPE:
+					return VarValue(tmp * x.double_value);
+					break;
+				case STRING_TYPE:
+					if ( allDigit(x.str_value) != -1 ) {
+						ss << x.str_value;
+						ss >> tmp2;
+						return VarValue(tmp / tmp2);
+					} else {
+						throw Exception("NaN Error");
+					}
+					break;
+				default:
+					break;
+			}
+		} else {
+			throw Exception("NaN Error");
+		}
+	} else {
+		throw Exception("invalid valuetype for /");
+	}
+}
+
+VarValue VarValue::operator %=(const VarValue& x) {
+	int int_tmp;
+	int int_tmp2;
+	double tmp;
+	double tmp2;
+	stringstream ss;
+
+	if ( this->valuetype == INT_TYPE ) {
+		switch ( x.valuetype ) {
+			case INT_TYPE:
+				return VarValue(this->int_value % x.int_value);
+				break;
+			case DOUBLE_TYPE:
+				return VarValue(fmod(this->int_value, x.double_value));
+				break;
+			case STRING_TYPE:
+				if ( allDigit(x.str_value) != -1 ) {
+					ss << x.str_value;
+					if ( allDigit(x.str_value) == 0 ) {
+						ss >> int_tmp;
+						return VarValue(this->int_value % int_tmp);
+					} else if ( allDigit(x.str_value) == 1 ) {
+						ss >> tmp;
+						return VarValue(fmod(this->int_value, tmp));
+					}
+				} else {
+					throw Exception("NaN Error");
+				}
+				break;
+			default:
+				break;
+		}
+	} else if ( this->valuetype == DOUBLE_TYPE ) {
+		switch ( x.valuetype ) {
+			case INT_TYPE:
+				return VarValue(fmod(this->double_value, x.int_value));
+				break;
+			case DOUBLE_TYPE:
+				return VarValue(fmod(this->double_value, x.double_value));
+				break;
+			case STRING_TYPE:
+				if ( allDigit(x.str_value) != -1 ) {
+					ss << x.str_value;
+					ss >> tmp;
+					return VarValue(fmod(this->int_value, tmp));
+				} else {
+					throw Exception("NaN Error");
+				}
+				break;
+			default:
+				break;
+		}
+	} else if ( this->valuetype == STRING_TYPE ) {
+		if ( allDigit(this->str_value) != -1 && allDigit(x.str_value) != -1 ) {
+			if ( allDigit(this->str_value) == 0 && allDigit(x.str_value) == 0 ) {
+				ss << this->str_value;
+				ss >> int_tmp;
+				ss << x.str_value;
+				ss >> int_tmp2;
+				return VarValue(int_tmp % int_tmp2);
+			} else {
+				ss << this->str_value;
+				ss >> tmp;
+				ss << x.str_value;
+				ss >> tmp2;
+				return VarValue(fmod(tmp, tmp2));
+			}
+		} else {
+			throw Exception("NaN Error");
+		}
+	} else {
+		throw Exception("invalid valuetype for \%");
+	}
+}
+
+
+VarValue VarValue::operator <<=(const VarValue& x) {
+	int int_tmp;
+	int int_tmp2;
+	stringstream ss;
+
+	if ( this->valuetype == INT_TYPE ) {
+		switch ( x.valuetype ) {
+			case INT_TYPE:
+				return VarValue(this->int_value << x.int_value);
+				break;
+			case DOUBLE_TYPE:
+				return VarValue(this->int_value << (int)x.double_value);
+				break;
+			case STRING_TYPE:
+				if ( allDigit(x.str_value) != -1 ) {
+					ss << x.str_value;
+					ss >> int_tmp;
+					return VarValue(this->int_value << int_tmp);
+				} else {
+					// if str_value contains letters, the result will be 0
+					return VarValue();
+				}
+				break;
+			default:
+				break;
+		}
+	} else if ( this->valuetype == DOUBLE_TYPE ) {
+		switch ( x.valuetype ) {
+			case INT_TYPE:
+				return VarValue((int)this->double_value << x.int_value);
+				break;
+			case DOUBLE_TYPE:
+				return VarValue((int)this->double_value << (int)x.double_value);
+				break;
+			case STRING_TYPE:
+				if ( allDigit(x.str_value) != -1 ) {
+					ss << x.str_value;
+					ss >> int_tmp;
+					return VarValue((int)this->double_value << (int)int_tmp);
+				} else {
+					// if str_value contains letters, the result will be 0
+					return VarValue();
+				}
+				break;
+			default:
+				break;
+		}
+	} else if ( this->valuetype == STRING_TYPE ) {
+		if ( allDigit(this->str_value) != -1 && allDigit(x.str_value) != -1 ) {
+			ss << this->str_value;
+			ss >> int_tmp;
+			ss << x.str_value;
+			ss >> int_tmp2;
+			return VarValue(int_tmp << int_tmp2);
+		} else {
+			return VarValue();
+		}
+	} else {
+		throw Exception("NaN Error");
+	}
+}
+
+VarValue VarValue::operator >>=(const VarValue& x) {
+	int int_tmp;
+	int int_tmp2;
+	stringstream ss;
+
+	if ( this->valuetype == INT_TYPE ) {
+		switch ( x.valuetype ) {
+			case INT_TYPE:
+				return VarValue(this->int_value >> x.int_value);
+				break;
+			case DOUBLE_TYPE:
+				return VarValue(this->int_value >> (int)x.double_value);
+				break;
+			case STRING_TYPE:
+				if ( allDigit(x.str_value) != -1 ) {
+					ss << x.str_value;
+					ss >> int_tmp;
+					return VarValue(this->int_value >> int_tmp);
+				} else {
+					// if str_value contains letters, the result will be 0
+					return VarValue();
+				}
+				break;
+			default:
+				break;
+		}
+	} else if ( this->valuetype == DOUBLE_TYPE ) {
+		switch ( x.valuetype ) {
+			case INT_TYPE:
+				return VarValue((int)this->double_value >> x.int_value);
+				break;
+			case DOUBLE_TYPE:
+				return VarValue((int)this->double_value >> (int)x.double_value);
+				break;
+			case STRING_TYPE:
+				if ( allDigit(x.str_value) != -1 ) {
+					ss << x.str_value;
+					ss >> int_tmp;
+					return VarValue((int)this->double_value >> (int)int_tmp);
+				} else {
+					// if str_value contains letters, the result will be 0
+					return VarValue();
+				}
+				break;
+			default:
+				break;
+		}
+	} else if ( this->valuetype == STRING_TYPE ) {
+		if ( allDigit(this->str_value) != -1 && allDigit(x.str_value) != -1 ) {
+			ss << this->str_value;
+			ss >> int_tmp;
+			ss << x.str_value;
+			ss >> int_tmp2;
+			return VarValue(int_tmp >> int_tmp2);
+		} else {
+			return VarValue();
+		}
+	} else {
+		throw Exception("NaN Error");
+	}
+}
+
 
 bool VarValue::operator ==(const VarValue& x) {
 	if ( this->valuetype == STRING_TYPE && x.valuetype == STRING_TYPE ) {
@@ -293,21 +1176,67 @@ bool VarValue::operator ==(const VarValue& x) {
 		else if ( this->valuetype == DOUBLE_TYPE )
 			m = this->double_value;
 		else if ( this->valuetype == STRING_TYPE ) {
-			ss << this->str_value;
-			ss >> m;
+			if ( allDigit(this->str_value) ) {
+				ss << this->str_value;
+				ss >> m;
+			} else {
+				return false;
+			}
 		}
 		if ( x.valuetype == INT_TYPE )
 			n = x.int_value;
 		else if ( x.valuetype == DOUBLE_TYPE )
 			n = x.double_value;
 		else if ( x.valuetype == STRING_TYPE ) {
-			ss << x.str_value;
-			ss >> n;
+			if ( allDigit(x.str_value) ) {
+				ss << x.str_value;
+				ss >> n;
+			} else {
+				return false;
+			}
 		}
 		if ( abs(m-n) < eps ) {
 			return true;
 		} else {
 			return false;
+		}
+	}
+}
+
+bool VarValue::operator !=(const VarValue& x) {
+	if ( this->valuetype == STRING_TYPE && x.valuetype == STRING_TYPE ) {
+		return (this->str_value != x.str_value);
+	} else {
+		double m, n;
+		stringstream ss;			
+		if ( this->valuetype == INT_TYPE )
+			m = this->int_value;
+		else if ( this->valuetype == DOUBLE_TYPE )
+			m = this->double_value;
+		else if ( this->valuetype == STRING_TYPE ) {
+			if ( hasDigit(this->str_value) ) {
+				ss << this->str_value;
+				ss >> m;
+			} else {
+				return true;
+			}
+		}
+		if ( x.valuetype == INT_TYPE )
+			n = x.int_value;
+		else if ( x.valuetype == DOUBLE_TYPE )
+			n = x.double_value;
+		else if ( x.valuetype == STRING_TYPE ) {
+			if ( hasDigit(x.str_value) ) {
+				ss << x.str_value;
+				ss >> n;
+			} else {
+				return true;
+			}
+		}
+		if ( abs(m-n) < eps ) {
+			return false;
+		} else {
+			return true;
 		}
 	}
 }
@@ -323,21 +1252,143 @@ bool VarValue::operator <(const VarValue& x) {
 		else if ( this->valuetype == DOUBLE_TYPE )
 			m = this->double_value;
 		else if ( this->valuetype == STRING_TYPE ) {
-			ss << this->str_value;
-			ss >> m;
+			if ( hasDigit(this->str_value) ) {
+				ss << this->str_value;
+				ss >> m;
+			} else {
+				return false;
+			}
 		}
 		if ( x.valuetype == INT_TYPE )
 			n = x.int_value;
 		else if ( x.valuetype == DOUBLE_TYPE )
 			n = x.double_value;
 		else if ( x.valuetype == STRING_TYPE ) {
-			ss << x.str_value;
-			ss >> n;
+			if ( hasDigit(x.str_value) ) {
+				ss << x.str_value;
+				ss >> n;
+			} else {
+				return false;
+			}
 		}
 		if ( n - m > eps ) {
 			return true;
 		} else {
 			return false;
+		}
+	}
+}
+
+bool VarValue::operator <=(const VarValue& x) {
+	if ( this->valuetype == STRING_TYPE && x.valuetype == STRING_TYPE ) {
+		return (this->str_value <= x.str_value);
+	} else {
+		double m, n;
+		stringstream ss;			
+		if ( this->valuetype == INT_TYPE )
+			m = this->int_value;
+		else if ( this->valuetype == DOUBLE_TYPE )
+			m = this->double_value;
+		else if ( this->valuetype == STRING_TYPE ) {
+			if ( hasDigit(this->str_value) ) {
+				ss << this->str_value;
+				ss >> m;
+			} else {
+				return false;
+			}
+		}
+		if ( x.valuetype == INT_TYPE )
+			n = x.int_value;
+		else if ( x.valuetype == DOUBLE_TYPE )
+			n = x.double_value;
+		else if ( x.valuetype == STRING_TYPE ) {
+			if ( hasDigit(x.str_value) ) {
+				ss << x.str_value;
+				ss >> n;
+			} else {
+				return false;
+			}
+		}
+		if ( m - n > eps ) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+}
+
+bool VarValue::operator >(const VarValue& x) {
+	if ( this->valuetype == STRING_TYPE && x.valuetype == STRING_TYPE ) {
+		return (this->str_value > x.str_value);
+	} else {
+		double m, n;
+		stringstream ss;			
+		if ( this->valuetype == INT_TYPE )
+			m = this->int_value;
+		else if ( this->valuetype == DOUBLE_TYPE )
+			m = this->double_value;
+		else if ( this->valuetype == STRING_TYPE ) {
+			if ( hasDigit(this->str_value) ) {
+				ss << this->str_value;
+				ss >> m;
+			} else {
+				return false;
+			}
+		}
+		if ( x.valuetype == INT_TYPE )
+			n = x.int_value;
+		else if ( x.valuetype == DOUBLE_TYPE )
+			n = x.double_value;
+		else if ( x.valuetype == STRING_TYPE ) {
+			if ( hasDigit(x.str_value) ) {
+				ss << x.str_value;
+				ss >> n;
+			} else {
+				return false;
+			}
+		}
+		if ( n - m > eps ) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+}
+
+bool VarValue::operator >=(const VarValue& x) {
+	if ( this->valuetype == STRING_TYPE && x.valuetype == STRING_TYPE ) {
+		return (this->str_value >= x.str_value);
+	} else {
+		double m, n;
+		stringstream ss;			
+		if ( this->valuetype == INT_TYPE )
+			m = this->int_value;
+		else if ( this->valuetype == DOUBLE_TYPE )
+			m = this->double_value;
+		else if ( this->valuetype == STRING_TYPE ) {
+			if ( hasDigit(this->str_value) ) {
+				ss << this->str_value;
+				ss >> m;
+			} else {
+				return false;
+			}
+		}
+		if ( x.valuetype == INT_TYPE )
+			n = x.int_value;
+		else if ( x.valuetype == DOUBLE_TYPE )
+			n = x.double_value;
+		else if ( x.valuetype == STRING_TYPE ) {
+			if ( hasDigit(x.str_value) ) {
+				ss << x.str_value;
+				ss >> n;
+			} else {
+				return false;
+			}
+		}
+		if ( n - n > eps ) {
+			return false;
+		} else {
+			return true;
 		}
 	}
 }
@@ -370,12 +1421,16 @@ Function ActRec::getFunc(const string &name){
 
 
 void ActRec::addVar(string varName, VarValue val) {
+	//cerr<<"addVar "<<varName<<endl;
 	mapVar[varName] = val;	
 }
 
 VarValue ActRec::getValue(string varName) {
-	if (mapVar.count(varName))
+	//cerr<<"getValue() "<<varName<<endl;
+	if (mapVar.count(varName)){
 		return mapVar[varName];
+		//cerr<<"has"<<endl;
+	}
 	else 
 		throw Exception("No such a variable in this scope.");
 }
@@ -442,7 +1497,14 @@ void ActRecManager::setVar(string varName, VarValue val) {
 	addVar(varName, val);
 }
 
+void ActRecManager::setVarMember(string varName, string index, VarValue val) {
+	VarValue* vp= acquireValuePointer(varName);
+	vp->addMember(index,val);
+}
+
 void ActRecManager::addVar(string varName, VarValue val) {
+	//cerr<<"top().addVar "<<varName<<endl;
+	//cerr<<"len = "<<varName.length()<<endl;
 	top().addVar(varName, val);	
 }
 

@@ -31,12 +31,13 @@ const VarValue UNDEFINED;// = (VarValue){-1, 0.0, ""};  //??
 static const int ITS_VAR = 0;
 static const int ITS_NUM = 1;
 static const int ITS_OP = 2;
+static const int ITS_MEMBERVAR = 3;
 
 
 
 
 struct Operator {
-	static const int MAX_SIZE = 2;
+	static const int MAX_SIZE = 3;
 
 	char t[MAX_SIZE];
 	int size;
@@ -44,9 +45,18 @@ struct Operator {
 	Operator(char c) { t[0]=c; size=1; }
 	Operator(char a, char b) { t[0]=a; t[1]=b; size=2; }
 	Operator(string s) {
-		assert(s.size()<=MAX_SIZE);
+		if (s.size()>MAX_SIZE) throw Exception("Unknown operator " + s + ".");  //assert(s.size()<=MAX_SIZE);
 		size = s.size();
 		for (int i=0; i<size; i++) t[i] = s[i];
+	}
+	Operator(const char s[]) {
+		for (int &i=size=0; s[i]; i++) {
+			if (i==MAX_SIZE) {
+				t[i]=0;
+				throw Exception("Unknown operator " + string(t) + ".");
+			}
+			t[i] = s[i];
+		}
 	}
 	operator string() {
 		string ret="";
@@ -83,14 +93,12 @@ bool isCharacter(char c) {
 	return (c>='a'&&c<='z') || (c>='A'&&c<='Z');
 }
 bool isOperator(Operator op) {
-	return (op == Operator('+')
-		|| op == Operator('-')
-		|| op == Operator('*')
-		|| op == Operator('/')
-		|| op == Operator('%')
-		|| op == Operator('=')
-		|| op == Operator('<')
-		|| op == Operator('=', '=')
+	return (op =='+' || op =='-' || op =='*' || op =='/' || op =='%'
+		|| op =="<<" || op ==">>"
+		|| op =='<' || op =="<=" || op =='>' || op ==">="
+		|| op =="==" || op =="!="
+		|| op =='=' || op =="+=" || op =="-=" || op =="*=" || op =="/=" || op =="%=" || op =="<<=" || op ==">>="
+		|| op =='.'
 		);
 }
 bool isSpace(char c) {
@@ -119,9 +127,11 @@ struct NumOrOp {
 	VarValue num;
 	VarValue *var;
 	Operator op;
+	string name;
 	NumOrOp(VarValue a):num(a), type(ITS_NUM) {}
 	NumOrOp(VarValue *a):var(a), type(ITS_VAR), num(*a) {}
 	NumOrOp(Operator c):op(c), type(ITS_OP), num(UNDEFINED) {}
+	NumOrOp(string s):name(s),type(ITS_MEMBERVAR) {}
 
 };
 ostream &operator<<(ostream &out, NumOrOp t) {
@@ -151,7 +161,11 @@ string MyStream::next() {
 		|| type == RIGHT_BRACKET_TYPE) return ret+=expr[p++];
 
 	if (type == NUMBER_TYPE) {
-		for (; p<expr.size() && (isDigit(expr[p]) || expr[p]=='.'); ret+=expr[p++]);
+		int tmp = 0;
+		for (; p<expr.size() && (isDigit(expr[p]) || expr[p]=='.'); ret+=expr[p++]) {
+			if (expr[p] == '.') tmp++;
+			if (tmp > 1) throw Exception("Unexpected token: .");
+		}
 		return ret;
 	}
 	if (type == STRING_TYPE2) {
@@ -173,12 +187,54 @@ string MyStream::next() {
 	}
 
 	if (type == FUNCTION_TYPE) {
-		int tmp = 0;  bool flag = 0;
-		for (; p<expr.size(); ) {
-			if (expr[p] == '(') flag = 1, tmp++, ret+=" ", p++;
-			else if (expr[p] == ')') tmp--, p++;
-			else ret+=expr[p++];
-			if (flag && tmp == 0) break;
+		int _t = 0;
+		for (int q=p; q<expr.size(); q++) {
+			if (expr[q] == '(') { _t = 1; break; }
+			if (expr[q] == '[') { _t = 2; break; }
+		}
+
+		bool ins0 = 0, ins1 = 0;
+		if (_t == 1) {
+			ret += "1 ";
+
+			int tmp = 0;  bool flag = 0;
+			for (; p<expr.size(); ) {
+				if (expr[p] == '\"') {
+					if (ins0) ins0 = 0;
+					else if (!ins1) ins0 = 1;
+				}
+				if (expr[p] == '\'') {
+					if (ins1) ins1 = 0;
+					else if (!ins0) ins1 = 1;
+				}
+				if (ins0 || ins1) { ret+=expr[p++]; continue; }  //如果在字符串内，那么直接加上这个字符就好
+
+				if (expr[p] == '(') flag = 1, tmp++, ret+=" ", p++;
+				else if (expr[p] == ')') tmp--, p++;
+				else ret+=expr[p++];
+				if (flag && tmp == 0) break;
+			}
+		}
+		else {
+			ret += "2 ";
+
+			int tmp = 0;  bool flag = 0;
+			for (; p<expr.size(); ) {
+				if (expr[p] == '\"') {
+					if (ins0) ins0 = 0;
+					else if (!ins1) ins0 = 1;
+				}
+				if (expr[p] == '\'') {
+					if (ins1) ins1 = 0;
+					else if (!ins0) ins1 = 1;
+				}
+				if (ins0 || ins1) { ret+=expr[p++]; continue; }  //如果在字符串内，那么直接加上这个字符就好
+
+				if (expr[p] == '[') flag = 1, tmp++, ret+=" ", p++;
+				else if (expr[p] == ']') tmp--, p++;
+				else ret+=expr[p++];
+				if (flag && tmp == 0) break;
+			}
 		}
 		return ret;
 	}
@@ -231,6 +287,15 @@ int MyStream::nextType() {
 				}
 				return WRONG_TYPE;
 			}
+			else if (expr[q] == '[') {
+				int tmp = 1;
+				for (q++; q<expr.size(); q++) {
+					if (expr[q] == '[') tmp++;
+					if (expr[q] == ']') tmp--;
+					if (tmp == 0) return FUNCTION_TYPE;
+				}
+				return WRONG_TYPE;
+			}
 			else if (isOperator(expr[q]) || isSpace(expr[q]) || expr[q]==')') return VARIABLE_TYPE;
 			else if (!isCharacter(expr[q]) && !isDigit(expr[q])) return WRONG_TYPE;
 		}
@@ -268,13 +333,15 @@ static bool isValid(int preType, int type) {
 	return typePair[preType][type];
 }
 
-int getPd(Operator c) {
-	// if (c == '(') return -1;
-	if (c == '=') return -14;
-	if (c == string("==")) return -7;
-	if (c == '<') return -6;
-	if (c == '+' || c == '-') return -4;
-	if (c == '*' || c == '/' || c == '%') return -3;
+int getPd(Operator op) {
+	// if (op == '(') return -1;
+	if (op == '=' || op == "+=" || op == "-=" || op == "*=" || op == "/=" || op == "%=" || op == "<<=" || op == ">>=") return -14;
+	if (op == "==" || op == "!=") return -7;
+	if (op == '<' || op =="<=" || op =='>' || op ==">=") return -6;
+	if (op == "<<" || op == ">>") return -5;
+	if (op == '+' || op == '-') return -4;
+	if (op == '*' || op == '/' || op == '%') return -3;
+	if (op == '.') return -1;
 	// if (c == ')') return 3;
 	return -1;
 }
@@ -287,21 +354,41 @@ void cal(vector<NumOrOp> &nums, Operator ch) {
 	NumOrOp _a = nums[nums.size()-1]; VarValue *pa = nums[nums.size()-1].var, a = nums[nums.size()-1].num; nums.pop_back();
 	// a.print(); cout<<a.getStrValue().size()<<endl; cout<<ch<<endl; b.print(); cout<<b.getStrValue().size()<<endl; cout<<endl;
 	VarValue c;
-	if (ch == '+') c=a+b;
-	else if (ch == '-') c=a-b;
-	else if (ch == '*') c=a*b;
-	else if (ch == '/') c=a/b;
-	else if (ch == '%') c=a%b;
-	else if (ch == '<') c=a<b;
-	else if (ch == Operator("==")) c=(a==b);
-	else if (ch == '=') {
-		if (_a.type != ITS_VAR)
-			throw Exception("Invalid left-hand side in assignment.");
-		c=(*pa=b);
+
+	if (ch == ".") {
+		if (_a.type == ITS_VAR) nums.push_back( (*pa)[_b.name] );
+		else					nums.push_back( a[_b.name] );
 	}
-	else throw Exception("Unknown operator: " + (string)ch);
-	nums.push_back(c);
-	// c.print(); cout<<c.getStrValue().size()<<endl; cout<<endl<<endl;
+	else {
+		if (ch == '+') c=a+b;
+		else if (ch == "-") c=a-b;
+		else if (ch == "*") c=a*b;
+		else if (ch == "/") c=a/b;
+		else if (ch == "%") c=a%b;
+		else if (ch == "<") c=a<b;
+		else if (ch == "<=") c=a<=b;
+		else if (ch == ">") c=a>b;
+		else if (ch == ">=") c=a>=b;
+		else if (ch == "<<") c=a<<b;
+		else if (ch == ">>") c=a>>b;
+		else if (ch == "==") c=(a==b);
+		else if (ch == "!=") c=(a!=b);
+		else if (ch == "=" || ch == "+=" || ch == "-=" || ch == "*=" || ch == "/=" || ch == "%=") {
+			if (_a.type != ITS_VAR)
+				throw Exception("Invalid left-hand side in assignment.");
+			if (ch == "=") c=(*pa=b);
+			else if (ch == "+=") c=(*pa+=b);
+			else if (ch == "-=") c=(*pa-=b);
+			else if (ch == "*=") c=(*pa*=b);
+			else if (ch == "/=") c=(*pa/=b);
+			else if (ch == "%=") c=(*pa%=b);
+			else if (ch == "<<=") c=(*pa<<=b);
+			else if (ch == ">>=") c=(*pa>>=b);
+		}
+		else throw Exception("Unknown operator: " + (string)ch);
+		nums.push_back(c);
+		// c.print(); cout<<c.getStrValue().size()<<endl; cout<<endl<<endl;
+	}
 }
 static VarValue calSuffix(const vector<NumOrOp> &suf) {
 	vector<NumOrOp> nums;
@@ -309,7 +396,7 @@ static VarValue calSuffix(const vector<NumOrOp> &suf) {
 		if (suf[i].type == ITS_NUM || suf[i].type == ITS_VAR) nums.push_back(suf[i]);
 		else cal(nums, suf[i].op);
 	if (nums.size() > 1) throw Exception("More than one result value.");// assert(nums.size() == 1);
-	if (nums.size() == 0) return UNDEFINED;
+	if (nums.size() == 0) return UNDEFINED;  //表达式为空
 	return ITS_VAR ? *nums[nums.size()-1].var : nums[nums.size()-1].num;
 }
 
@@ -324,18 +411,19 @@ VarValue getExpResult(string expr) {
 	// puts("!!!!!!!!!!!!!");
 	// cout<<expr<<endl;
 
-	if (expr.size() == 0) return UNDEFINED;  //表达式为空，则返回UNDEFINED
 	vector<NumOrOp> suf;
 	// vector<char> ops;
 	vector<Operator> ops;
 
 	MyStream in = MyStream(expr);
+	if (!in.hasNext()) return UNDEFINED;  //表达式为空，则返回UNDEFINED
+
 	int type, preType = MIN_INT;
 	for (; in.hasNext(); preType=type) {
 		type = in.nextType();
 		// cout<<"haha"<<endl;
 		// cout<<"type="<<type<<" preType="<<preType<<" | "<<in._next()<<endl;
-		if (!isValid(preType, type)) throw Exception("Unexpected token: " + string(in.next()));  //表达式有问题
+		if (!isValid(preType, type)) throw Exception("Unexpected token: " + in.next());  //表达式有问题
 
 		if (type == OPERATOR_TYPE || type == LEFT_BRACKET_TYPE || type == RIGHT_BRACKET_TYPE) {
 			Operator c = in.next();
@@ -354,6 +442,11 @@ VarValue getExpResult(string expr) {
 						if (ops.size() == 0) break;
 					}
 					ops.push_back(c);
+
+					if (c == ".") {
+						if (in.nextType() != VARIABLE_TYPE) throw Exception("Unexpected token: " + in.next());
+						suf.push_back(NumOrOp( in.next() ));
+					}
 				}
 			}
 		}
@@ -378,24 +471,36 @@ VarValue getExpResult(string expr) {
 			// puts("haha");
 		}
 		else if (type == FUNCTION_TYPE) {
-			//TODO 异常处理
 
 			//要加上f(1)[2]之类情况的判断??
 			string s = in.next();
+			int _t = s[0]-48; s=s.substr(2, s.size()-2);
 			int d = s.find(" ");
 			string name = s.substr(0, d), arglist = s.substr(d, s.size()-d);
-			suf.push_back(NumOrOp( callFunction(name, arglist) ));
+			if (_t == 1) {
+				suf.push_back(NumOrOp( callFunction(name, arglist) ));
+			}
+			else {
+				// (*actRecManager.acquireValuePointer(name)).print();
+				// cout<<name<<" "<<arglist<<" "<<getExpResult(arglist).toString()<<endl;
+				suf.push_back(NumOrOp( (*actRecManager.acquireValuePointer(name))[ getExpResult(arglist).toString() ] ));
+				// cout<<name<<" "<<arglist<<" "<<getExpResult(arglist).toString()<<endl;
+			}
 		}
 		else {  /*  未知错误  */
 			throw Exception("Unknown error.");
 			return UNDEFINED;
 		}
 	}
-	// puts("Start to cal");
 
 	while (ops.size()) suf.push_back(NumOrOp( ops[ops.size()-1] )), ops.pop_back();
 	// if (expr.find('i') !=string::npos) cout<<"!!!!!!!---------!!!!!!!"<<calSuffix(suf)<<endl;
 	// suf[0].num.print();
-	// calSuffix(suf).print();
+	// if (expr.find("[")!=string::npos) {
+	// 	cout<<expr<<" haha "<<suf.size()<<endl;
+	// 	suf[0].var->print();
+	// 	suf[2].var->print();
+	// 	calSuffix(suf).print();
+	// }
 	return calSuffix(suf);
 }

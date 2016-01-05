@@ -13,6 +13,7 @@
 #define INT_TYPE 1
 #define DOUBLE_TYPE 2
 #define STRING_TYPE 3
+#define OBJECT_TYPE 4
 
 using namespace std;
 
@@ -24,12 +25,25 @@ public:
 	void print();
 };
 
+class VarValue;
+typedef VarValue* PVarValue;
+
+class Object{
+public:
+	string name;
+	map<string,PVarValue> memberMap;
+	void addMember(const string& memName,const VarValue& var);
+	PVarValue operator[](const string& name);
+	string toString();
+};
+
 
 class VarValue {
 public:
 	VarValue();
 	VarValue(double);
 	VarValue(string);
+	VarValue(Object);
 	int getValueType();
 	long long getIntValue();
 	double getDoubleValue();
@@ -37,6 +51,9 @@ public:
 	void print();
 	bool toBool();
 	string toString();
+	void addMember(const string& name,const VarValue& val);
+
+	PVarValue operator[](const string&);
 
 	// overload arithmetic operators
 	VarValue operator +(const VarValue&);
@@ -44,16 +61,33 @@ public:
 	VarValue operator *(const VarValue&);
 	VarValue operator /(const VarValue&);
 	VarValue operator %(const VarValue&);
+	VarValue operator <<(const VarValue&);
+	VarValue operator >>(const VarValue&);
 	
+	// overload assignment operators
+	//VarValue operator =(const VarValue&);
+	VarValue operator +=(const VarValue&);
+	VarValue operator -=(const VarValue&);
+	VarValue operator *=(const VarValue&);
+	VarValue operator /=(const VarValue&);
+	VarValue operator %=(const VarValue&);
+	VarValue operator <<=(const VarValue&);
+	VarValue operator >>=(const VarValue&);
+
 	// overload logical operators
 	bool operator ==(const VarValue&);
+	bool operator !=(const VarValue&);
 	bool operator <(const VarValue&);
+	bool operator <=(const VarValue&);
+	bool operator >(const VarValue&);
+	bool operator >=(const VarValue&);
 
 private:
 	int valuetype;			// -1 for undefined, 0 for null, 1 for int, 2 for double, 3 for string
 	long long int_value;
 	double double_value;
 	string str_value;
+	Object obj_value;
 };
 
 class ActRec {
@@ -85,6 +119,7 @@ public:
 	Function getFunc(const string &name);
 	void addFunc(const Function &func);
 	ActRec& top();	// pay attention to copy construct
+	void setVarMember(string varName, string index, VarValue val); 
 private:
 	vector<ActRec> vecActRec;
 };

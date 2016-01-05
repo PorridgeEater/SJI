@@ -1,14 +1,22 @@
-var n = 10 ;
-var c = 0; /* hhh
-var a = c<n;
-print c<n;
-print a; // 23333333
+<<<<<<< HEAD
 /*
 	hahahsdfasdfasdfasdfsdf
 */
 // hhhhh
+var a = 0 ; // 23333333
+var b = 1 ;
+var c = 2 ; /* hhh
+
+asdasd*/
 d = 1;
 var e;
+=======
+var n = 10 ;
+var c = 0;
+var a = c<n;
+print c<n;
+print a;
+>>>>>>> d8e7a3fa596808c96aab5a1939c04393eaaf13fa
 
 var str="---------I'm a string--------------";
 print str;

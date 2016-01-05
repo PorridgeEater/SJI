@@ -22,6 +22,16 @@ int main(int argc, char const *argv[])
 	actRecManager.deleteAR();
 	cerr<<"######################################"<<endl;
 	*/
+	
+	/*
+	actRecManager.insertAR(ActRec());
+	actRecManager.addVar("abc",Object());
+	actRecManager.setVarMember("abc","str",VarValue("first"));
+	actRecManager.setVarMember("abc","test",VarValue(3.7));
+	cout<<actRecManager.acquireValue("abc").toString()<<endl;
+	cout<<"---------------------------------------"<<endl;
+	actRecManager.deleteAR();
+	*/
 	try{
 	    ifstream in("test.js");
 	    stringstream buffer;
