@@ -93,9 +93,11 @@ PVarValue Object::operator[](const string& name){
 string Object::toString(){
 	auto it=memberMap.begin();
 	string ret = "Object {";
-	ret= ret + it->first + ": " + (it->second)->toString();
-	for (++it;it!=memberMap.end();++it){
-		ret = ret + ", " + it->first + ": " + (it->second)->toString();
+	if (it!=memberMap.end()){
+		ret = ret + it->first + ": " + (it->second)->toString();
+		for (++it;it!=memberMap.end();++it){
+			ret = ret + ", " + it->first + ": " + (it->second)->toString();
+		}
 	}
 	ret = ret + "}";
 	return ret;
