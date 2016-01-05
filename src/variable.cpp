@@ -1502,10 +1502,10 @@ bool VarValue::operator >(const VarValue& x) {
 				return false;
 			}
 		}
-		if ( n - m > eps ) {
-			return false;
-		} else {
+		if ( m - n > eps ) {
 			return true;
+		} else {
+			return false;
 		}
 	}
 }
@@ -1542,7 +1542,7 @@ bool VarValue::operator >=(const VarValue& x) {
 				return false;
 			}
 		}
-		if ( n - n > eps ) {
+		if ( n - m > eps ) {
 			return false;
 		} else {
 			return true;
