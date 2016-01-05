@@ -42,16 +42,3 @@ struct varValue {
 Edited by PorridgeEater 2015.12.30
 
 - - - -
-
-## FUNCTION PART(to be continued...)
-
-```cpp
-class Function{
-	string name,content;
-	vector<string> arg;
-};
-```
-
-```cpp
-bool interpreter(string content,ActRecord ar);
-```
