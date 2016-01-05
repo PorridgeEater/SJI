@@ -1,6 +1,7 @@
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include "variable.h"
 #include "function.h"
 #include "calculator.h"
@@ -108,6 +109,12 @@ double stringToDouble(string s) {  //只支持十进制，不支持负数
 	double ret = 0.0;
 	for (int i=0; i<s.size(); i++) ret = ret*10 + s[i]-'0';
 	return ret;
+}
+bool isLeftBracket(char c) {
+	return c=='[' || c=='{';
+}
+bool isRightBracket(char c) {
+	return c==']' || c=='}';
 }
 
 
@@ -352,9 +359,13 @@ string MyStream::nextVar() {
 }
 string MyStream::nextExpr(char left, char right) {
 	bool ins0 = 0, ins1 = 0;
+	vector<char> bracket; bracket.push_back(left);
+	int judge[256][256] = {0}; memset(judge,0,sizeof(judge));
+	judge['['][']'] = judge['{']['}'] = 1;
+	judge['[']['}'] = judge['{'][']'] = -1;
+
 	string ret = "";
 
-	int bn = 0;
 	for (; p<expr.size(); ) {
 		if (expr[p] == '\"') {
 			if (ins0) ins0 = 0;
@@ -366,13 +377,24 @@ string MyStream::nextExpr(char left, char right) {
 		}
 		if (ins0 || ins1) { ret+=expr[p++]; continue; }  //如果在字符串内，那么直接加上这个字符就好
 
-		if (expr[p] == left) bn++;
-		if (expr[p] == right) bn--;
-		if (expr[p] == ',' || (expr[p] == right && bn == -1)) return ret;
+		if (isRightBracket(expr[p])) {
+			switch (judge[bracket[bracket.size()-1]][expr[p]]) {
+				case -1: throw Exception("Unmatched brackets."); break;
+				case 0: bracket.push_back(expr[p]); break;
+				case 1: bracket.pop_back(); break;
+				default: break;
+			}
+		}
+		if (isLeftBracket(expr[p]))
+			bracket.push_back(expr[p]);
+		if (expr[p] == ',' && bracket.size() == 1) return ret;
+		if (expr[p] == right && bracket.size() == 0) return ret;
+		// if (expr[p] == ',' || (expr[p] == right && bracket.size()==0)) return ret;
 		ret+=expr[p++];
 	}
 	hasNext();
 	if (expr[p]!=right) throw Exception((string)"nextExpr: Unexpected token: " + ret+expr[p]+expr);
+	if (bracket.size()>0) throw Exception((string)"Uncaught SyntaxError");
 	return ret;
 }
 Object MyStream::nextObject() {
