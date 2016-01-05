@@ -287,9 +287,13 @@ int MyStream::nextType() {
 	if (isDigit(expr[p])) {
 		int dotNum = 0;
 		for (int q=p+1; q<expr.size(); q++)
-			if (!isDigit(expr[q]))
-				if (expr[q] == '.') dotNum++;
-				else break;
+			if (!isDigit(expr[q])) {
+				if (expr[q] == '.') {
+					dotNum++;
+				} else {
+					break;
+				}
+			}
 		if (dotNum > 1) return WRONG_TYPE;
 		return NUMBER_TYPE;
 	}

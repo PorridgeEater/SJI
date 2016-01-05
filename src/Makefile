@@ -14,4 +14,4 @@ calculator.o: calculator.cpp calculator.h function.h variable.h exception.h
 exception.o: exception.cpp exception.h
 	g++ -std=c++11 -g -c exception.cpp
 clean:
-	rm *.o *.gch *.out
+	rm *.o *.out

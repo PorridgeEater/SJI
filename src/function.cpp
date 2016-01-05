@@ -34,17 +34,17 @@ VarValue callFunction(const string name, const string argList){
 	VarValue var;
 	for (int i=0;i<func.arg.size();i++)
 		ar.addVar(func.arg[i]);
+	VarValue argObj = VarValue(Object());
+	char tmpName[100];
 	for (int i=0;i<arg.size();i++){
 		var=getExpResult(arg[i]);
+		sprintf(tmpName,"%d",i);
+		argObj.addMember(tmpName,var);
 		if (i<func.arg.size()){
 			ar.addVar(func.arg[i],var);
 		}
-		else{
-			char tmpName[100];
-			sprintf(tmpName,"arguments[%d]",i);
-			ar.addVar(tmpName,var);
-		}
 	}
+	ar.addVar("arguments",argObj);
 	actRecManager.insertAR(ar);
 	VarValue ret;
 	try {
