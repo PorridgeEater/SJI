@@ -147,12 +147,12 @@ ostream &operator<<(ostream &out, NumOrOp t) {
 
 MyStream::MyStream(string expr):expr(expr), p(0) {}
 bool MyStream::hasNext() {
-	while (p < expr.size() && expr[p] == ' ') p++;
+	while (p < expr.size() && isSpace(expr[p])) p++;
 	return p != expr.size();// && expr[p] != ';';
 }
 string MyStream::next() {
 	hasNext();
-	
+
 	string ret = "";
 
 	int type = nextType();
