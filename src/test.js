@@ -19,6 +19,35 @@ function f(){
 	print "first f()";
 }
 
+switch (n) {
+	case 1:
+		print "Enter case 1";
+		break;
+	case 5:
+		print "Enter case 5";
+	case 10:
+		print "Enter case 10";
+	default:
+		print "Enter default";
+		break;
+}
+
+for ( var i = 0 ; i < n ; i = i+1 )
+{
+	print i;
+	if (i > 5) {
+		break;
+	}
+}
+var i = 0;
+while (1) {
+	print i;
+	if (i > 5) {
+		break;
+	}
+	i = i + 1;
+}
+
 function g(){
 	function f(){
 		print "second f()";

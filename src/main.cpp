@@ -41,6 +41,8 @@ int main(int argc, char const *argv[])
 	    actRecManager.deleteAR();
 	} catch (Exception e){
 		e.errMessage();
+	} catch (interrupt e) {
+		cout << "break" << endl;
 	}
     return 0;
 }
