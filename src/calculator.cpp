@@ -312,16 +312,16 @@ int MyStream::nextType() {
 
 void MyStream::nextColon() {
 	for (; p<expr.size() && expr[p]!=':'; p++)
-		if (!isSpace(expr[p])) throw Exception("nextColon1: Unexpected token: " + expr[p]);
+		if (!isSpace(expr[p])) throw Exception((string)"nextColon1: Unexpected token: " + expr[p]);
 	if (expr[p]==':') p++;
-	else throw Exception("nextColon2: Unexpected token: " + expr[p]);
+	else throw Exception((string)"nextColon2: Unexpected token: " + expr[p]);
 }
 void MyStream::nextComma() {
 	for (; p<expr.size() && expr[p]!=',' && expr[p]!='}'; p++)
-		if (!isSpace(expr[p])) throw Exception("nextComma1: Unexpected token: " + expr[p]);
+		if (!isSpace(expr[p])) throw Exception((string)"nextComma1: Unexpected token: " + expr[p]);
 	if (expr[p] == ',') p++;
 	else if (expr[p] == '}') ;
-	else throw Exception("nextComma2: Unexpected token: " + expr[p]);
+	else throw Exception((string)"nextComma2: Unexpected token: " + expr[p]);
 }
 string MyStream::nextVar() {
 	string ret = "";
@@ -347,11 +347,11 @@ string MyStream::nextExpr() {
 		ret+=expr[p++];
 	}
 	hasNext();
-	if (expr[p]!='}') throw Exception("nextExpr: Unexpected token: " + expr[p]);
+	if (expr[p]!='}') throw Exception((string)"nextExpr: Unexpected token: " + expr[p]);
 	return ret;
 }
 Object MyStream::nextObject() {
-	if (expr[p] != '{') throw Exception("Object definition failed.");
+	if (expr[p] != '{') throw Exception((string)"Object definition failed.");
 	next();
 	// cout<<expr<<endl;
 	Object ret;
