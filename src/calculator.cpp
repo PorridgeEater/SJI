@@ -133,6 +133,7 @@ struct MyStream {
 	void nextComma(char right);
 	Object nextObject();
 	Object nextArray();
+	VarValue nextFunction(int functype);
 };
 
 struct NumOrOp {
@@ -353,6 +354,7 @@ void MyStream::nextComma(char right) {
 	else throw Exception((string)"nextComma2: Unexpected token: " + expr[p]);
 }
 string MyStream::nextVar() {
+	if (nextType() != VARIABLE_TYPE) throw Exception("Unexpected token: " + next());
 	string ret = "";
 	for (; p<expr.size() && (isCharacter(expr[p]) || isDigit(expr[p])); ret+=expr[p++]);
 	return ret;
@@ -433,6 +435,59 @@ Object MyStream::nextArray() {
 	// VarValue(ret).print();
 	// VarValue(ret)["name"]->print();
 	return ret;
+}
+VarValue MyStream::nextFunction(int functype) {
+	// cout<<expr<<endl;
+	hasNext();
+	string name = "", arglist = "", content = "";
+	if (functype == 0) {
+		next();  //"function"
+		if (next() != "(") throw Exception("Function definition failed (1).");
+		for (; _next() != ")"; ) {
+			arglist += nextVar() + ",";
+			nextComma(')');
+		}
+		if (arglist.size() > 0) arglist = arglist.substr(0, arglist.size()-1);
+		next();  //")"
+	}
+	else {
+		string s = next();
+		int _t = s[0]-48; s=s.substr(2, s.size()-2);
+		int d = s.find(" ");
+		assert(d!=string::npos);
+		name = s.substr(0, d), arglist = s.substr(d, s.size()-d);
+	}
+
+	if (_next() != "{") throw Exception("Function definition failed (2).");
+	////
+	{
+		hasNext();
+
+		bool ins0 = 0, ins1 = 0;
+		int tmp = 0;  bool flag = 0;
+
+		for (; p<expr.size(); ) {
+			if (expr[p] == '\"') {
+				if (ins0) ins0 = 0;
+				else if (!ins1) ins0 = 1;
+			}
+			if (expr[p] == '\'') {
+				if (ins1) ins1 = 0;
+				else if (!ins0) ins1 = 1;
+			}
+			if (ins0 || ins1) { content+=expr[p++]; continue; }  //如果在字符串内，那么直接加上这个字符就好
+
+			if (expr[p] == '{') flag = 1, tmp++, p++;
+			else if (expr[p] == '}') tmp--, p++;
+			else content+=expr[p++];
+			// cout<<p<<" "<<flag<<" "<<tmp<<" "<<expr[p-1]<<endl;
+			if (flag && tmp == 0) break;
+		}
+		// cout<<content<<endl;
+		name = "function";  //arglist和content没有括号
+	}
+
+	return VarValue(Function(name, arglist, content));
 }
 string MyStream::_next() {
 	int _p = p;
@@ -629,24 +684,76 @@ VarValue getExpResult(string expr) {
 			suf.push_back(NumOrOp( VarValue(in.next()) ));
 		}
 		else if (type == VARIABLE_TYPE) {
-			// puts("haha");
-			// suf.push_back(NumOrOp( actRecManager.acquireValue(in.next()) ));
-			suf.push_back(NumOrOp( actRecManager.acquireValuePointer(in.next()) ));
-			// puts("haha");
+			if (in._next() == "function") {
+				// in.next();  //"function"
+				// if (in.next() != "(") throw Exception("Function definition failed.");
+				// string name = "", arglist = "", content = "";
+				// for (; in._next() != ")"; ) {
+				// 	arglist += in.nextVar() + ",";
+				// 	in.nextComma(')');
+				// }
+				// if (arglist.size() > 0) arglist = arglist.substr(0, arglist.size()-1);
+				// in.next();  //")"
+
+				// if (in._next() != "{") throw Exception("Function definition failed.");
+				// ////
+				// {
+				// 	bool ins0 = 0, ins1 = 0;
+				// 	int tmp = 0;  bool flag = 0;
+
+				// 	int &p = in.p;
+				// 	for (; p<expr.size(); ) {
+				// 		if (expr[p] == '\"') {
+				// 			if (ins0) ins0 = 0;
+				// 			else if (!ins1) ins0 = 1;
+				// 		}
+				// 		if (expr[p] == '\'') {
+				// 			if (ins1) ins1 = 0;
+				// 			else if (!ins0) ins1 = 1;
+				// 		}
+				// 		if (ins0 || ins1) { content+=expr[p++]; continue; }  //如果在字符串内，那么直接加上这个字符就好
+
+				// 		if (expr[p] == '{') flag = 1, tmp++, content+="{", p++;
+				// 		else if (expr[p] == '}') tmp--, p++;
+				// 		else content+=expr[p++];
+				// 		if (flag && tmp == 0) break;
+				// 	}
+				// 	if (p == expr.size()) throw Exception("Function definition failed.");
+				// 	name = "(" + arglist + ") {" + content + "}";  //arglist和content没有括号
+				// }
+
+				// suf.push_back(NumOrOp( VarValue(Function(name, arglist, content)) ));
+				suf.push_back(NumOrOp( in.nextFunction(0) ));
+			}
+			else {
+				// puts("haha");
+				// suf.push_back(NumOrOp( actRecManager.acquireValue(in.next()) ));
+				suf.push_back(NumOrOp( actRecManager.acquireValuePointer(in.next()) ));
+				// puts("haha");
+			}
 		}
 		else if (type == FUNCTION_TYPE) {
+			int tempP = in.p;
+
 			string s = in.next();
 			int _t = s[0]-48; s=s.substr(2, s.size()-2);
 			int d = s.find(" ");
 			string name = s.substr(0, d), arglist = s.substr(d, s.size()-d);
-			if (_t == 1) {
-				suf.push_back(NumOrOp( callFunction(name, arglist) ));
+
+			if (name == "function") {
+				in.p = tempP;
+				suf.push_back(NumOrOp( in.nextFunction(1) ));
 			}
 			else {
-				// (*actRecManager.acquireValuePointer(name)).print();
-				// cout<<name<<" "<<arglist<<" "<<getExpResult(arglist).toString()<<endl;
-				suf.push_back(NumOrOp( (*actRecManager.acquireValuePointer(name))[ getExpResult(arglist).toString() ] ));
-				// cout<<name<<" "<<arglist<<" "<<getExpResult(arglist).toString()<<endl;
+				if (_t == 1) {
+					suf.push_back(NumOrOp( callFunction(name, arglist) ));
+				}
+				else {
+					// (*actRecManager.acquireValuePointer(name)).print();
+					// cout<<name<<" "<<arglist<<" "<<getExpResult(arglist).toString()<<endl;
+					suf.push_back(NumOrOp( (*actRecManager.acquireValuePointer(name))[ getExpResult(arglist).toString() ] ));
+					// cout<<name<<" "<<arglist<<" "<<getExpResult(arglist).toString()<<endl;
+				}
 			}
 		}
 		else {  /*  未知错误  */

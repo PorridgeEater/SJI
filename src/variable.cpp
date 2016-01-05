@@ -70,7 +70,7 @@ Function::Function(const string name, const string argList, const string content
 }
 
 string Function::toString(){
-	string ret=name+"(";
+	string ret=name+" (";
 	if (arg.size()>0) ret=ret+arg[0];
 	for (int i=1;i<arg.size();i++)
 		ret=ret+", "+arg[i];
@@ -259,6 +259,11 @@ PVarValue VarValue::operator[](const string& name){
 VarValue VarValue::operator +(const VarValue& x) {
 	string tmp;
 	stringstream ss;
+
+	if (this->valuetype == FUNC_TYPE || x.valuetype == FUNC_TYPE) {
+		VarValue a = *this, b = VarValue(x);
+		return VarValue(a.toString() + b.toString());
+	}
 
 	if ( this->valuetype == UNDEFINED_TYPE ) {
 		switch ( x.valuetype ) {
