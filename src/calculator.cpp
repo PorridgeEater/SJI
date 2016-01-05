@@ -141,7 +141,8 @@ struct NumOrOp {
 };
 ostream &operator<<(ostream &out, NumOrOp t) {
 	if (t.type == ITS_NUM) return (t.num).print(), out;
-	if (t.type == ITS_MEMBERVAR || t.type == ITS_VAR) return (*t.var).print(), out;
+	if (t.type == ITS_VAR) return (*t.var).print(), out;
+	if (t.type == ITS_MEMBERVAR) return out<<t.name<<endl;
 	return out<<t.op<<endl;
 }
 ostream &operator<<(ostream &out, vector<Operator> t) {
@@ -416,7 +417,7 @@ static bool isValid(int preType, int type) {
 }
 
 int getPd(Operator op) {
-	if (op == '(') return -100;
+	if (op == '(') return -100;  //这是必要的...
 	if (op == '=' || op == "+=" || op == "-=" || op == "*=" || op == "/=" || op == "%=" || op == "<<=" || op == ">>=") return -14;
 	if (op == "==" || op == "!=") return -7;
 	if (op == '<' || op =="<=" || op =='>' || op ==">=") return -6;
@@ -424,7 +425,7 @@ int getPd(Operator op) {
 	if (op == '+' || op == '-') return -4;
 	if (op == '*' || op == '/' || op == '%') return -3;
 	if (op == '.') return -1;
-	if (op == ')') return 0;
+	if (op == ')') return 0;  //这是必要的...
 	return -1;
 }
 static int cmpOp(Operator c1, Operator c2) {
@@ -473,10 +474,10 @@ void cal(vector<NumOrOp> &nums, Operator ch) {
 	}
 }
 static VarValue calSuffix(const vector<NumOrOp> &suf) {
-	// cout<<suf<<endl;
 	vector<NumOrOp> nums;
 	for (int i=0; i<suf.size(); i++)
-		if (suf[i].type == ITS_NUM || suf[i].type == ITS_VAR) nums.push_back(suf[i]);
+		if (suf[i].type == ITS_NUM || suf[i].type == ITS_VAR || suf[i].type == ITS_MEMBERVAR)
+			nums.push_back(suf[i]);
 		else {
 			try {
 				cal(nums, suf[i].op);
@@ -559,11 +560,14 @@ VarValue getExpResult(string expr) {
 					}
 					ops.push_back(c);
 
-					if (c == ".") {
-						if (in.nextType() != VARIABLE_TYPE) throw Exception("getExpResult: '.': Unexpected token: " + in.next());
-						suf.push_back(NumOrOp( in.next() ));
-					}
 				}
+			}
+
+			if (c == ".") {
+				if ((type=in.nextType()) != VARIABLE_TYPE)
+					throw Exception("getExpResult: '.': Unexpected token: " + in.next());
+				suf.push_back(NumOrOp( in.next() ));
+				// cout<<suf<<" haha\n"<<ops<<endl;
 			}
 			// cout<<"\n\n!!!!!!!!!! (2)"<<ops<<endl;
 		}

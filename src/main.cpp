@@ -33,7 +33,7 @@ int main(int argc, char const *argv[])
 	actRecManager.deleteAR();
 	*/
 	try {
-		ifstream in(argv[1]);
+		ifstream in(argc == 1 ? "test.js" : argv[1]);
 		stringstream buffer;
 		buffer << in.rdbuf();
 		actRecManager.insertAR(ActRec());
