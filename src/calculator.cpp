@@ -348,6 +348,7 @@ string MyStream::nextExpr() {
 	bool ins0 = 0, ins1 = 0;
 	string ret = "";
 
+	int bn = 0;
 	for (; p<expr.size(); ) {
 		if (expr[p] == '\"') {
 			if (ins0) ins0 = 0;
@@ -359,11 +360,13 @@ string MyStream::nextExpr() {
 		}
 		if (ins0 || ins1) { ret+=expr[p++]; continue; }  //如果在字符串内，那么直接加上这个字符就好
 
-		if (expr[p] == ',' || expr[p] == '}') return ret;
+		if (expr[p] == '{') bn++;
+		if (expr[p] == '}') bn--;
+		if (expr[p] == ',' || (expr[p] == '}'&&bn==-1)) return ret;
 		ret+=expr[p++];
 	}
 	hasNext();
-	if (expr[p]!='}') throw Exception((string)"nextExpr: Unexpected token: " + expr[p]);
+	if (expr[p]!='}') throw Exception((string)"nextExpr: Unexpected token: " + ret+expr[p]+expr);
 	return ret;
 }
 Object MyStream::nextObject() {
@@ -476,7 +479,7 @@ void cal(vector<NumOrOp> &nums, Operator ch) {
 static VarValue calSuffix(const vector<NumOrOp> &suf) {
 	vector<NumOrOp> nums;
 	for (int i=0; i<suf.size(); i++)
-		if (suf[i].type == ITS_NUM || suf[i].type == ITS_VAR || suf[i].type == ITS_MEMBERVAR)
+		if (suf[i].type == ITS_NUM || suf[i].type == ITS_VAR || suf[i].type == ITS_MEMBERVAR)  //
 			nums.push_back(suf[i]);
 		else {
 			try {
