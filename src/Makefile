@@ -9,8 +9,8 @@ interpreter.o: interpreter.cpp interpreter.h
 	g++ -std=c++11 -g -c interpreter.cpp interpreter.h
 function.o: function.cpp function.h interpreter.h calculator.h
 	g++ -std=c++11 -g -c function.cpp function.h interpreter.h calculator.h
-calculator.o: calculator.cpp calculator.h function.h variable.h
-	g++ -std=c++11 -g -c calculator.cpp calculator.h function.h variable.h
+calculator.o: calculator.cpp calculator.h function.h variable.h exception.h
+	g++ -std=c++11 -g -c calculator.cpp calculator.h function.h variable.h exception.h
 exception.o: exception.cpp exception.h
 	g++ -std=c++11 -g -c exception.cpp exception.h
 clean:

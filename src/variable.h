@@ -34,6 +34,7 @@ public:
 	map<string,PVarValue> memberMap;
 	void addMember(const string& memName,const VarValue& var);
 	PVarValue operator[](const string& name);
+	string toString();
 };
 
 

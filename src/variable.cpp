@@ -54,6 +54,16 @@ PVarValue Object::operator[](const string& name){
 	return memberMap[name];
 }
 
+string Object::toString(){
+	auto it=memberMap.begin();
+	cout<<"Object {";
+	cout<<it->first<<": "<<(it->second)->toString();
+	for (++it;it!=memberMap.end();++it){
+		cout<<", "<<it->first<<": "<<(it->second)->toString();
+	}
+	cout<<"}";
+}
+
 
 // implement VarValue
 VarValue::VarValue() {
@@ -117,6 +127,9 @@ bool VarValue::toBool() {
 		case STRING_TYPE:
 			return str_value.length()!=0;
 			break;
+		case OBJECT_TYPE:
+			return true;
+			break;
 		default:
 			throw Exception("invalid valuetype!");
 			break;
@@ -151,7 +164,8 @@ string VarValue::toString() {
 			return str_value;
 			break;
 		case OBJECT_TYPE:
-			return "I'm an object.";
+			return obj_value.toString();
+			break;
 		default:
 			throw Exception("Invalid valuetype!");
 			break;
