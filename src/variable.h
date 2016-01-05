@@ -14,6 +14,7 @@
 #define DOUBLE_TYPE 2
 #define STRING_TYPE 3
 #define OBJECT_TYPE 4
+#define FUNC_TYPE 5
 
 using namespace std;
 
@@ -21,8 +22,10 @@ class Function{
 public:
 	string name,content;
 	vector<string> arg;
-
 	void print();
+	Function();
+	Function(const string name, const string argList, const string content);
+	string toString();
 };
 
 class VarValue;
@@ -39,15 +42,25 @@ public:
 
 
 class VarValue {
+private:
+	int valuetype;			// -1 for undefined, 0 for null, 1 for int, 2 for double, 3 for string
+	long long int_value;
+	double double_value;
+	string str_value;
+	Object obj_value;
+	Function func_value;
+
 public:
 	VarValue();
 	VarValue(double);
 	VarValue(string);
 	VarValue(Object);
+	VarValue(Function);
 	int getValueType();
 	long long getIntValue();
 	double getDoubleValue();
 	string getStrValue();
+	Function getFuncValue();
 	void print();
 	bool toBool();
 	string toString();
@@ -82,12 +95,6 @@ public:
 	bool operator >(const VarValue&);
 	bool operator >=(const VarValue&);
 
-private:
-	int valuetype;			// -1 for undefined, 0 for null, 1 for int, 2 for double, 3 for string
-	long long int_value;
-	double double_value;
-	string str_value;
-	Object obj_value;
 };
 
 class ActRec {
@@ -98,13 +105,8 @@ public:
 	VarValue getValue(string varName);
 	VarValue* getValuePointer(string varName);
 
-	int findFunc(const string &name);
-	void addFunc(const Function &func);
-	Function getFunc(const string &name);
-
 private:
 	map<string, VarValue> mapVar;
-	vector<Function> funcList;
 };
 
 class ActRecManager {
@@ -117,7 +119,6 @@ public:
 	VarValue acquireValue(string varName);
 	VarValue* acquireValuePointer(string varName);
 	Function getFunc(const string &name);
-	void addFunc(const Function &func);
 	ActRec& top();	// pay attention to copy construct
 	void setVarMember(string varName, string index, VarValue val); 
 private:

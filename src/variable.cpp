@@ -43,6 +43,41 @@ void Function::print(){
 	cerr<<"-------------------"<<endl;
 }
 
+Function::Function(){}
+
+void splitArgList(const string &argList,vector<string> &v){
+	char tmp[100];
+	int cnt=0;
+	for (int i=0,l=argList.length();i<l;i++)
+		if (argList[i]!=' ') tmp[cnt++]=argList[i];
+	tmp[cnt]='\0';
+	string s(tmp);
+	if (s.length()==0) return;
+	for (int i=0,last=-1,l=s.length();i<=l;i++){
+		if (i==l || s[i]==','){
+			if (i<=last+1) throw Exception("Arguments are wrong.");
+			v.push_back(s.substr(last+1,i-last-1));
+			last=i;
+		}
+	}
+}
+
+Function::Function(const string name, const string argList, const string content){
+	this->name=name;
+	this->content=content;
+	splitArgList(argList,this->arg);
+}
+
+string Function::toString(){
+	string ret=name+"(";
+	if (arg.size()>0) ret=ret+arg[0];
+	for (int i=1;i<arg.size();i++)
+		ret=ret+", "+arg[i];
+	ret=ret+") {";
+	ret=ret+content+"}";
+	return ret;
+}
+
 
 void Object::addMember(const string& memName,const VarValue& var){
 	VarValue *pv = new VarValue();
@@ -56,12 +91,13 @@ PVarValue Object::operator[](const string& name){
 
 string Object::toString(){
 	auto it=memberMap.begin();
-	cout<<"Object {";
-	cout<<it->first<<": "<<(it->second)->toString();
+	string ret = "Object {";
+	ret= ret + it->first + ": " + (it->second)->toString();
 	for (++it;it!=memberMap.end();++it){
-		cout<<", "<<it->first<<": "<<(it->second)->toString();
+		ret = ret + ", " + it->first + ": " + (it->second)->toString();
 	}
-	cout<<"}";
+	ret = ret + "}";
+	return ret;
 }
 
 
@@ -90,6 +126,11 @@ VarValue::VarValue(Object x){
 	obj_value=x;
 }
 
+VarValue::VarValue(Function x){
+	valuetype=FUNC_TYPE;
+	func_value=x;
+}
+
 void VarValue::addMember(const string& name,const VarValue& val){
 	if (valuetype==OBJECT_TYPE) {
 		obj_value.addMember(name,val);
@@ -106,6 +147,10 @@ long long VarValue::getIntValue() {
 
 double VarValue::getDoubleValue() {
 	return double_value;
+}
+
+Function VarValue::getFuncValue() {
+	return func_value;
 }
 
 string VarValue::getStrValue() {
@@ -128,6 +173,9 @@ bool VarValue::toBool() {
 			return str_value.length()!=0;
 			break;
 		case OBJECT_TYPE:
+			return true;
+			break;
+		case FUNC_TYPE:
 			return true;
 			break;
 		default:
@@ -165,6 +213,9 @@ string VarValue::toString() {
 			break;
 		case OBJECT_TYPE:
 			return obj_value.toString();
+			break;
+		case FUNC_TYPE:
+			return func_value.toString();
 			break;
 		default:
 			throw Exception("Invalid valuetype!");
@@ -1400,25 +1451,6 @@ int ActRec::getSize() {
 	return mapVar.size();
 }
 
-int ActRec::findFunc(const string &name){
-	for (int i=0;i<funcList.size();i++){
-		if (funcList[i].name==name) return i;
-	}
-	return -1;
-}
-void ActRec::addFunc(const Function &func){
-	int t=findFunc(func.name);
-	if (t>=0) funcList[t]=func;
-	else funcList.push_back(func);
-}
-Function ActRec::getFunc(const string &name){
-	int t=findFunc(name);
-	if (t>=0){
-		return funcList[t];
-	}
-	else throw Exception("No such a function \""+name+"\"."); 
-}
-
 
 void ActRec::addVar(string varName, VarValue val) {
 	//cerr<<"addVar "<<varName<<endl;
@@ -1464,22 +1496,16 @@ bool ActRecManager::deleteAR() {
 }
 
 
-void ActRecManager::addFunc(const Function &func) {
-	top().addFunc(func);	
-}
-
 Function ActRecManager::getFunc(const string &name) {
-	int size = getSize();
-	Function func;
-	while (size--) {
-		try{
-			func = vecActRec[size].getFunc(name);
-			return func;
-		} catch (Exception e) {
-			continue;
+	try{
+		VarValue var = acquireValue(name);
+		if (var.getValueType()!=FUNC_TYPE){
+			throw Exception(name+"() is not a function.");
 		}
+		else return var.getFuncValue();
+	} catch (Exception e){
+		throw Exception("No such a function \""+name+"()\".");
 	}
-	throw Exception("No such a function \""+name+"()\".");
 }
 
 void ActRecManager::setVar(string varName, VarValue val) {

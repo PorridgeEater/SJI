@@ -102,7 +102,7 @@ bool isOperator(Operator op) {
 		);
 }
 bool isSpace(char c) {
-	return c==' ' || c=='\t';
+	return c==' ' || c=='\t' || c=='\n';
 }
 double stringToDouble(string s) {  //只支持十进制，不支持负数
 	double ret = 0.0;
@@ -120,6 +120,11 @@ struct MyStream {
 	string _next();
 	int nextType();
 	bool hasExtraExp();
+	Object nextObject();
+	string nextVar();
+	string nextExpr();
+	void nextColon();
+	void nextComma();
 };
 
 struct NumOrOp {
@@ -164,7 +169,7 @@ string MyStream::next() {
 		int tmp = 0;
 		for (; p<expr.size() && (isDigit(expr[p]) || expr[p]=='.'); ret+=expr[p++]) {
 			if (expr[p] == '.') tmp++;
-			if (tmp > 1) throw Exception("Unexpected token: .");
+			if (tmp > 1) throw Exception("next: Unexpected token: .");
 		}
 		return ret;
 	}
@@ -245,7 +250,7 @@ string MyStream::next() {
 	}
 }
 int MyStream::nextType() {
-	if (expr[p] == '(') return LEFT_BRACKET_TYPE;
+	if (expr[p] == '(' || expr[p] == '{') return LEFT_BRACKET_TYPE;
 	if (expr[p] == ')') return RIGHT_BRACKET_TYPE;
 
 	/*  字符串  */
@@ -297,11 +302,73 @@ int MyStream::nextType() {
 				return WRONG_TYPE;
 			}
 			else if (isOperator(expr[q]) || isSpace(expr[q]) || expr[q]==')') return VARIABLE_TYPE;
-			else if (!isCharacter(expr[q]) && !isDigit(expr[q])) return WRONG_TYPE;
+			// else if (!isCharacter(expr[q]) && !isDigit(expr[q])) return WRONG_TYPE;
+			else if (!isCharacter(expr[q]) && !isDigit(expr[q])) return VARIABLE_TYPE;
 		}
 		return VARIABLE_TYPE;
 	}
 	return WRONG_TYPE;
+}
+
+void MyStream::nextColon() {
+	for (; p<expr.size() && expr[p]!=':'; p++)
+		if (!isSpace(expr[p])) throw Exception((string)"nextColon1: Unexpected token: " + expr[p]);
+	if (expr[p]==':') p++;
+	else throw Exception((string)"nextColon2: Unexpected token: " + expr[p]);
+}
+void MyStream::nextComma() {
+	for (; p<expr.size() && expr[p]!=',' && expr[p]!='}'; p++)
+		if (!isSpace(expr[p])) throw Exception((string)"nextComma1: Unexpected token: " + expr[p]);
+	if (expr[p] == ',') p++;
+	else if (expr[p] == '}') ;
+	else throw Exception((string)"nextComma2: Unexpected token: " + expr[p]);
+}
+string MyStream::nextVar() {
+	string ret = "";
+	for (; p<expr.size() && (isCharacter(expr[p]) || isDigit(expr[p])); ret+=expr[p++]);
+	return ret;
+}
+string MyStream::nextExpr() {
+	bool ins0 = 0, ins1 = 0;
+	string ret = "";
+
+	for (; p<expr.size(); ) {
+		if (expr[p] == '\"') {
+			if (ins0) ins0 = 0;
+			else if (!ins1) ins0 = 1;
+		}
+		if (expr[p] == '\'') {
+			if (ins1) ins1 = 0;
+			else if (!ins0) ins1 = 1;
+		}
+		if (ins0 || ins1) { ret+=expr[p++]; continue; }  //如果在字符串内，那么直接加上这个字符就好
+
+		if (expr[p] == ',' || expr[p] == '}') return ret;
+		ret+=expr[p++];
+	}
+	hasNext();
+	if (expr[p]!='}') throw Exception((string)"nextExpr: Unexpected token: " + expr[p]);
+	return ret;
+}
+Object MyStream::nextObject() {
+	if (expr[p] != '{') throw Exception((string)"Object definition failed.");
+	next();
+	// cout<<expr<<endl;
+	Object ret;
+	while (hasNext() && _next() != "}") {
+		// cout<<nextType()<<endl;
+		// cout<<"type="<<(nextType())<<" "<<expr[p]<<" "<<_next()<<endl;
+		if (nextType() != VARIABLE_TYPE) throw Exception("nextObject: Unexpected token: " + next() + ".");
+		string var = nextVar();
+		nextColon();
+		ret.addMember(var, getExpResult(nextExpr()));
+		nextComma();
+	}
+	if (!hasNext() || _next() != "}") throw Exception("\"}\" Expected.");
+	next();
+	// VarValue(ret).print();
+	// VarValue(ret)["name"]->print();
+	return ret;
 }
 string MyStream::_next() {
 	int _p = p;
@@ -418,14 +485,37 @@ VarValue getExpResult(string expr) {
 	MyStream in = MyStream(expr);
 	if (!in.hasNext()) return UNDEFINED;  //表达式为空，则返回UNDEFINED
 
+	{
+		int d = expr.find("=");
+		if (in.nextType() == VARIABLE_TYPE) {
+		in.next();
+		string s = in.next();
+		if (Operator("=") == s) {
+			string s1 = expr.substr(0, d), s2 = expr.substr(d+1, expr.size()-d-1);
+			if (s1.find("[") != string::npos) {
+				//nothing
+			}
+			else {
+				actRecManager.setVar(s1=MyStream(s1).next(), getExpResult(s2));
+				return *actRecManager.acquireValuePointer(s1);
+			}
+		}
+		}
+		in = MyStream(expr);
+	}
+
+
 	int type, preType = MIN_INT;
 	for (; in.hasNext(); preType=type) {
 		type = in.nextType();
 		// cout<<"haha"<<endl;
 		// cout<<"type="<<type<<" preType="<<preType<<" | "<<in._next()<<endl;
-		if (!isValid(preType, type)) throw Exception("Unexpected token: " + in.next());  //表达式有问题
+		if (!isValid(preType, type)) throw Exception("getExpResult: Unexpected token: " + in.next());  //表达式有问题
 
-		if (type == OPERATOR_TYPE || type == LEFT_BRACKET_TYPE || type == RIGHT_BRACKET_TYPE) {
+		if (type == LEFT_BRACKET_TYPE && in._next() == "{") {
+			suf.push_back(NumOrOp( VarValue(in.nextObject()) ));
+		}
+		else if (type == OPERATOR_TYPE || type == LEFT_BRACKET_TYPE || type == RIGHT_BRACKET_TYPE) {
 			Operator c = in.next();
 			if (ops.size() == 0 || c == '(') ops.push_back(c);
 			else {
@@ -444,7 +534,7 @@ VarValue getExpResult(string expr) {
 					ops.push_back(c);
 
 					if (c == ".") {
-						if (in.nextType() != VARIABLE_TYPE) throw Exception("Unexpected token: " + in.next());
+						if (in.nextType() != VARIABLE_TYPE) throw Exception("getExpResult: '.': Unexpected token: " + in.next());
 						suf.push_back(NumOrOp( in.next() ));
 					}
 				}

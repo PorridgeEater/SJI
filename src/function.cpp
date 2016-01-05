@@ -2,7 +2,7 @@
 #include "interpreter.h"
 #include "calculator.h"
 
-void splitArgList(const string &argList,vector<string> &v){
+void func_splitArgList(const string &argList,vector<string> &v){
 	char tmp[100];
 	int cnt=0;
 	for (int i=0,l=argList.length();i<l;i++)
@@ -20,20 +20,17 @@ void splitArgList(const string &argList,vector<string> &v){
 }
 
 void defineFunction(const string name, const string argList, const string content){
-	Function func;
-	func.name=name;
-	func.content=content;
-	splitArgList(argList,func.arg);
-	actRecManager.addFunc(func);
+	Function func(name,argList,content);
+	actRecManager.addVar(name,VarValue(func));
 }
 
 VarValue callFunction(const string name, const string argList){
-	cerr<<"#### callFunction"<<endl;
+	cerr<<"################## callFunction"<<endl;
 	Function func = actRecManager.getFunc(name);
 	func.print();
 	ActRec ar;
 	vector<string> arg;
-	splitArgList(argList,arg);
+	func_splitArgList(argList,arg);
 	VarValue var;
 	for (int i=0;i<func.arg.size();i++)
 		ar.addVar(func.arg[i]);

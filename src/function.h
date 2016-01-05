@@ -10,8 +10,6 @@
 
 using namespace std;
 
-void splitArgList(const string &argList,vector<string> &v);
-
 void defineFunction(const string name, const string argList, const string content);
 
 VarValue callFunction(const string name, const string argList);

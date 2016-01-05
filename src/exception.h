@@ -12,4 +12,5 @@ public:
 	void errMessage();
 };
 
+class interrupt{};
 #endif
