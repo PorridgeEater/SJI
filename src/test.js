@@ -1,6 +1,12 @@
-var a = 0 ;
+/*
+	hahahsdfasdfasdfasdfsdf
+*/
+// hhhhh
+var a = 0 ; // 23333333
 var b = 1 ;
-var c = 2 ;
+var c = 2 ; /* hhh
+
+asdasd*/
 d = 1;
 var e;
 

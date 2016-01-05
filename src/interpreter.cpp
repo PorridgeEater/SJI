@@ -5,15 +5,11 @@ static string getContent(string s, int &p, char left, char right)
     while (p < s.length() && (s[p] == ' ' || s[p] == '\n' || s[p] == 9)) {
         p++;
     }
-    if (p > s.length()) {
-        cout << "Can't find " << left << endl;
-        return "";
-    }
-    if (s[p] != left) {
-        cout << "s[p]: " << s[p] << endl;
-        
-        printf("Error: Not find %c!\n", left);
-        return "";
+    if (p > s.length() || s[p] != left) {
+        string err= "Can't find ";
+        err += left;
+        err += '\n';
+        throw Exception(err);
     }
     int count = 1;
     string condition = "";
@@ -34,8 +30,7 @@ static string getContent(string s, int &p, char left, char right)
         }
     }
     if (p++ >= s.length()) {
-        printf("Error: Brackets mismatched!");
-        return "";
+        throw Exception("Error: Brackets mismatched!\n");
     }
     return condition;
 }
@@ -52,10 +47,12 @@ static string getKey(string code, int &p)
     if (p >= code.length()) {
         return "";
     }
-    key += code[p++];
-    if (code[p] == '{' || code[p] == '}') {
+    key += code[p];
+    if (code[p] == '{' || code[p] == '}' || code[p] == '/') {
+        p++;
         return key;
     }
+    p++;
     while (p < code.length() &&
            ( (code[p] >= 'a' && code[p] <= 'z') ||
              (code[p] >= 'A' && code[p] <= 'Z') ||
@@ -65,8 +62,7 @@ static string getKey(string code, int &p)
         key += code[p++];
     }
     if (p >= code.length()) {
-        cout << "Syntax Error!2" << endl;
-        return "";
+        throw Exception("Syntax Error in getKey!\n");
     }
     return key;
 }
@@ -108,8 +104,7 @@ static void forStatement(string condition, string content) {
     string init = condition.substr(0, p);
     
     if (p >= condition.length()) {
-        cout << "Syntax Error in for statement!" << endl;
-        return;
+        throw Exception("Syntax Error in for statement!\n");
     }
     
     int q = p;
@@ -117,8 +112,7 @@ static void forStatement(string condition, string content) {
     string cond = condition.substr(q, p-q-2);
     
     if (p >= condition.length()) {
-        cout << "Syntax Error in for statement!" << endl;
-        return;
+        throw Exception("Syntax Error in for statement!\n");
     }
     
     int t = p;
@@ -213,8 +207,7 @@ VarValue interpreter(string code)
                     exp += code[pos++];
                 }
                 if (pos >= code.length()) {
-                    cout << "Syntax Error after 'var'" << endl;
-                    break;
+                    throw Exception("Syntax Error after 'var'\n");
                 }
                 pos++;
                 cout << "Name: " << name << endl;
@@ -249,7 +242,38 @@ VarValue interpreter(string code)
             pos++;
             return getExpResult(exp);
         }
+        else if (e == "/") {
+            cout << "Comment" << endl;
+            //cout << pos << " " << code[pos] << endl;
+            if (code[pos] == '*') {
+                bool right = false;
+                while (pos < code.length()-2 && !right) {
+                    if (code[++pos] == '*'){
+                        if (code[++pos] == '/') {
+                            right = true;
+                        }
+                    }
+                }
+            }
+            else if (code[pos] == '/') {
+                while (pos < code.length()-1 && code[++pos] != '\n') {}
+            }
+            else {
+                throw Exception("Syntax Error after '/'\n");
+            }
+            pos++;
+        }
         else {
+            string exp = e;
+            while (pos < code.length() && code[pos] != ';') {
+                exp += code[pos];
+                pos++;
+            }
+            if (pos >= code.length()) {
+                throw Exception("Missing ';'\n");
+            }
+            getExpResult(exp);
+            /*
             while (pos < code.length() && (code[pos] == ' ' || code[pos] == '\n' || code[pos] == 9)) {pos++;}
             if (pos >= code.length()) {
                 cout << "Syntax Error!3" << endl;
@@ -284,6 +308,7 @@ VarValue interpreter(string code)
             else {
                 cout << "Syntax Error!4" << endl;
             }
+            */
         }
         cout << endl;
     }
