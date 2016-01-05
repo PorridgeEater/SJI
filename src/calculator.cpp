@@ -140,8 +140,21 @@ struct NumOrOp {
 
 };
 ostream &operator<<(ostream &out, NumOrOp t) {
-	if (t.type == ITS_NUM) return out<<(t.num).getIntValue()<<endl;
+	if (t.type == ITS_NUM) return (t.num).print(), out;
+	if (t.type == ITS_MEMBERVAR || t.type == ITS_VAR) return (*t.var).print(), out;
 	return out<<t.op<<endl;
+}
+ostream &operator<<(ostream &out, vector<Operator> t) {
+	out<<"----------------------------------vector<Operator>:  Start.\n";
+	for (auto tt : t) out<<string(tt)<<endl;
+	out<<"----------------------------------vector<Operator>:  End.\n";
+	return out;
+}
+ostream &operator<<(ostream &out, vector<NumOrOp> t) {
+	out<<"----------------------------------vector<NumOrOp>:  Start.\n";
+	for (auto tt : t) out<<tt<<endl;
+	out<<"----------------------------------vector<NumOrOp>:  End.\n";
+	return out;
 }
 
 
@@ -403,7 +416,7 @@ static bool isValid(int preType, int type) {
 }
 
 int getPd(Operator op) {
-	// if (op == '(') return -1;
+	if (op == '(') return -100;
 	if (op == '=' || op == "+=" || op == "-=" || op == "*=" || op == "/=" || op == "%=" || op == "<<=" || op == ">>=") return -14;
 	if (op == "==" || op == "!=") return -7;
 	if (op == '<' || op =="<=" || op =='>' || op ==">=") return -6;
@@ -411,7 +424,7 @@ int getPd(Operator op) {
 	if (op == '+' || op == '-') return -4;
 	if (op == '*' || op == '/' || op == '%') return -3;
 	if (op == '.') return -1;
-	// if (c == ')') return 3;
+	if (op == ')') return 0;
 	return -1;
 }
 static int cmpOp(Operator c1, Operator c2) {
@@ -460,10 +473,17 @@ void cal(vector<NumOrOp> &nums, Operator ch) {
 	}
 }
 static VarValue calSuffix(const vector<NumOrOp> &suf) {
+	// cout<<suf<<endl;
 	vector<NumOrOp> nums;
 	for (int i=0; i<suf.size(); i++)
 		if (suf[i].type == ITS_NUM || suf[i].type == ITS_VAR) nums.push_back(suf[i]);
-		else cal(nums, suf[i].op);
+		else {
+			try {
+				cal(nums, suf[i].op);
+			} catch (Exception e) {
+				nums.push_back(VarValue(string("NaN")));
+			}
+		}
 	if (nums.size() > 1) throw Exception("More than one result value.");// assert(nums.size() == 1);
 	if (nums.size() == 0) return UNDEFINED;  //表达式为空
 	return ITS_VAR ? *nums[nums.size()-1].var : nums[nums.size()-1].num;
@@ -521,6 +541,7 @@ VarValue getExpResult(string expr) {
 		}
 		else if (type == OPERATOR_TYPE || type == LEFT_BRACKET_TYPE || type == RIGHT_BRACKET_TYPE) {
 			Operator c = in.next();
+			// cout<<"\n\n!!!!!!!!!! (1)"<<ops<<" operator is "<<c<<endl;
 			if (ops.size() == 0 || c == '(') ops.push_back(c);
 			else {
 				Operator c0 = ops[ops.size()-1];
@@ -528,6 +549,7 @@ VarValue getExpResult(string expr) {
 				else if (c0 == '(') ops.push_back(c);
 				else if (c == ')') {
 					for (; ops[ops.size()-1]!='('; suf.push_back(NumOrOp( ops[ops.size()-1] )), ops.pop_back()) ;
+						// puts("haha");
 					ops.pop_back();
 				}
 				else {
@@ -543,6 +565,7 @@ VarValue getExpResult(string expr) {
 					}
 				}
 			}
+			// cout<<"\n\n!!!!!!!!!! (2)"<<ops<<endl;
 		}
 		else if (type == NUMBER_TYPE) {
 			string s = in.next();
