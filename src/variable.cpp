@@ -164,7 +164,9 @@ void VarValue::print() {
 }
 
 PVarValue VarValue::operator[](const string& name){
-	if (valuetype!=OBJECT_TYPE) return NULL;
+	if (valuetype!=OBJECT_TYPE){
+		obj_value.addMember(name,VarValue());
+	};
 	return obj_value[name];
 }
 
