@@ -375,7 +375,8 @@ VarValue interpreter(string code)
                 throw Exception("Missing ';'\n");
             }
             pos++;
-            getExpResult(exp);
+            cout << "Expression: " << exp << endl;
+            cout << "Result: " << getExpResult(exp).toString() << endl;
             /*
             while (pos < code.length() && (code[pos] == ' ' || code[pos] == '\n' || code[pos] == 9)) {pos++;}
             if (pos >= code.length()) {
