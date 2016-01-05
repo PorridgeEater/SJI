@@ -42,7 +42,9 @@ int main(int argc, char const *argv[])
 	} catch (Exception e){
 		e.errMessage();
 	} catch (interrupt e) {
-		cout << "break" << endl;
+		//cout << "break" << endl;
+	} catch (VarValue e) {
+
 	}
     return 0;
 }

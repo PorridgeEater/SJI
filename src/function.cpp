@@ -46,7 +46,14 @@ VarValue callFunction(const string name, const string argList){
 		}
 	}
 	actRecManager.insertAR(ar);
-	VarValue ret = interpreter(func.content);
+	VarValue ret;
+	try {
+		ret = interpreter(func.content);
+	} catch (VarValue var){
+		//cout << "catch: " << var.toString() << endl;
+		actRecManager.deleteAR();
+		return var;
+	}
 	actRecManager.deleteAR();
 	return ret;
 }

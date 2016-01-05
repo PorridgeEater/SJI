@@ -70,14 +70,38 @@ static string getKey(string code, int &p)
 }
 
 static void ifStatement(string condition, string content, string others) {
-    // cout << condition << " " << content << endl;
     actRecManager.insertAR(ActRec());
     VarValue result = getExpResult(condition);
+    //cout << "Result " << result.toString() << endl;
     if (result.toBool()) {
-        interpreter(content);
+        try {
+            interpreter(content);
+        } catch (VarValue e) {
+            actRecManager.deleteAR();
+            throw e;
+        } catch (interrupt e) {
+            //cout << "break" << endl;
+            actRecManager.deleteAR();
+            throw e;
+        } catch (Exception e) {
+            actRecManager.deleteAR();
+            throw e;
+        }
     }
     else {
-        interpreter(others);
+        try {
+            interpreter(others);
+        } catch (VarValue e) {
+            actRecManager.deleteAR();
+            throw e;
+        } catch (interrupt e) {
+            //cout << "break" << endl;
+            actRecManager.deleteAR();
+            throw e;
+        } catch (Exception e) {
+            actRecManager.deleteAR();
+            throw e;
+        }
     }
     actRecManager.deleteAR();
 }
@@ -91,8 +115,15 @@ static void whileStatement(string condition, string content) {
             interpreter(content);
         } catch (interrupt e) {
             //cout << "break" << endl;
+            actRecManager.deleteAR();
             break;
         } catch (Exception e) {
+            actRecManager.deleteAR();
+            actRecManager.deleteAR();
+            throw e;
+        } catch (VarValue e) {
+            actRecManager.deleteAR();
+            actRecManager.deleteAR();
             throw e;
         }
         actRecManager.deleteAR();
@@ -113,6 +144,7 @@ static void forStatement(string condition, string content) {
     string init = condition.substr(0, p);
     
     if (p >= condition.length()) {
+        actRecManager.deleteAR();
         throw Exception("Syntax Error in for statement!\n");
     }
     
@@ -121,6 +153,7 @@ static void forStatement(string condition, string content) {
     string cond = condition.substr(q, p-q-2);
     
     if (p >= condition.length()) {
+        actRecManager.deleteAR();
         throw Exception("Syntax Error in for statement!\n");
     }
     
@@ -141,8 +174,15 @@ static void forStatement(string condition, string content) {
             interpreter(content);
         } catch (interrupt e) {
             //cout << "break" << endl;
+            actRecManager.deleteAR();
             break;
         } catch (Exception e) {
+            actRecManager.deleteAR();
+            actRecManager.deleteAR();
+            throw e;
+        } catch (VarValue e) {
+            actRecManager.deleteAR();
+            actRecManager.deleteAR();
             throw e;
         }
         interpreter(iter);
@@ -221,6 +261,10 @@ void switchStatement(string condition, string content) {
     } catch (interrupt e) {
         //cout << "break" << endl;
     } catch (Exception e) {
+        actRecManager.deleteAR();
+        throw e;
+    } catch (VarValue e) {
+        actRecManager.deleteAR();
         throw e;
     }
     actRecManager.deleteAR();
@@ -244,8 +288,8 @@ VarValue interpreter(string code)
             string condition = getContent(code, pos, '(', ')');
             string content = getContent(code, pos, '{', '}');
             
-            //cout << "condition: " << condition << endl;
-            //cout << "content: " << content << endl;
+            // cout << "condition: " << condition << endl;
+            // cout << "content: " << content << endl;
             
             int old = pos;
             string others = getKey(code, pos);
@@ -342,7 +386,9 @@ VarValue interpreter(string code)
                 exp += code[pos++];
             }
             pos++;
-            return getExpResult(exp);
+            //cout << "return: " << exp << endl;
+            //cout << "Result: " << getExpResult(exp).toString() << endl;
+            throw getExpResult(exp);
         }
         else if (e == "/") {
             //cout << "Comment" << endl;
