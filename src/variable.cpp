@@ -350,8 +350,12 @@ VarValue VarValue::operator -(const VarValue& x) {
 					break;
 				case STRING_TYPE:
 					if ( allDigit(x.str_value) != -1 ) {
+						cout << "tmp=" << tmp << endl;
+						ss.clear();
+						ss.str("");
 						ss << x.str_value;
 						ss >> tmp2;
+						cout << "tmp2=" << tmp2 << endl;
 						return VarValue(tmp - tmp2);
 					} else {
 						throw Exception("NaN Error");
@@ -426,6 +430,8 @@ VarValue VarValue::operator *(const VarValue& x) {
 					break;
 				case STRING_TYPE:
 					if ( allDigit(x.str_value) != -1 ) {
+						ss.clear();
+						ss.str("");
 						ss << x.str_value;
 						ss >> tmp2;
 						return VarValue(tmp * tmp2);
@@ -502,6 +508,8 @@ VarValue VarValue::operator /(const VarValue& x) {
 					break;
 				case STRING_TYPE:
 					if ( allDigit(x.str_value) != -1 ) {
+						ss.clear();
+						ss.str("");
 						ss << x.str_value;
 						ss >> tmp2;
 						return VarValue(tmp / tmp2);
@@ -577,12 +585,16 @@ VarValue VarValue::operator %(const VarValue& x) {
 			if ( allDigit(this->str_value) == 0 && allDigit(x.str_value) == 0 ) {
 				ss << this->str_value;
 				ss >> int_tmp;
+				ss.clear();
+				ss.str("");
 				ss << x.str_value;
 				ss >> int_tmp2;
 				return VarValue(int_tmp % int_tmp2);
 			} else {
 				ss << this->str_value;
 				ss >> tmp;
+				ss.clear();
+				ss.str("");
 				ss << x.str_value;
 				ss >> tmp2;
 				return VarValue(fmod(tmp, tmp2));
@@ -646,6 +658,8 @@ VarValue VarValue::operator <<(const VarValue& x) {
 		if ( allDigit(this->str_value) != -1 && allDigit(x.str_value) != -1 ) {
 			ss << this->str_value;
 			ss >> int_tmp;
+			ss.clear();
+			ss.str("");
 			ss << x.str_value;
 			ss >> int_tmp2;
 			return VarValue(int_tmp << int_tmp2);
@@ -708,6 +722,8 @@ VarValue VarValue::operator >>(const VarValue& x) {
 		if ( allDigit(this->str_value) != -1 && allDigit(x.str_value) != -1 ) {
 			ss << this->str_value;
 			ss >> int_tmp;
+			ss.clear();
+			ss.str("");
 			ss << x.str_value;
 			ss >> int_tmp2;
 			return VarValue(int_tmp >> int_tmp2);
@@ -845,6 +861,8 @@ VarValue VarValue::operator -=(const VarValue& x) {
 					break;
 				case STRING_TYPE:
 					if ( allDigit(x.str_value) != -1 ) {
+						ss.clear();
+						ss.str("");
 						ss << x.str_value;
 						ss >> tmp2;
 						return VarValue(tmp - tmp2);
@@ -921,6 +939,8 @@ VarValue VarValue::operator *=(const VarValue& x) {
 					break;
 				case STRING_TYPE:
 					if ( allDigit(x.str_value) != -1 ) {
+						ss.clear();
+						ss.str("");
 						ss << x.str_value;
 						ss >> tmp2;
 						return VarValue(tmp * tmp2);
@@ -997,6 +1017,8 @@ VarValue VarValue::operator /=(const VarValue& x) {
 					break;
 				case STRING_TYPE:
 					if ( allDigit(x.str_value) != -1 ) {
+						ss.clear();
+						ss.str("");
 						ss << x.str_value;
 						ss >> tmp2;
 						return VarValue(tmp / tmp2);
@@ -1072,12 +1094,16 @@ VarValue VarValue::operator %=(const VarValue& x) {
 			if ( allDigit(this->str_value) == 0 && allDigit(x.str_value) == 0 ) {
 				ss << this->str_value;
 				ss >> int_tmp;
+				ss.clear();
+				ss.str("");
 				ss << x.str_value;
 				ss >> int_tmp2;
 				return VarValue(int_tmp % int_tmp2);
 			} else {
 				ss << this->str_value;
 				ss >> tmp;
+				ss.clear();
+				ss.str("");
 				ss << x.str_value;
 				ss >> tmp2;
 				return VarValue(fmod(tmp, tmp2));
@@ -1142,6 +1168,8 @@ VarValue VarValue::operator <<=(const VarValue& x) {
 		if ( allDigit(this->str_value) != -1 && allDigit(x.str_value) != -1 ) {
 			ss << this->str_value;
 			ss >> int_tmp;
+			ss.clear();
+			ss.str("");
 			ss << x.str_value;
 			ss >> int_tmp2;
 			return VarValue(int_tmp << int_tmp2);
@@ -1204,6 +1232,8 @@ VarValue VarValue::operator >>=(const VarValue& x) {
 		if ( allDigit(this->str_value) != -1 && allDigit(x.str_value) != -1 ) {
 			ss << this->str_value;
 			ss >> int_tmp;
+			ss.clear();
+			ss.str("");
 			ss << x.str_value;
 			ss >> int_tmp2;
 			return VarValue(int_tmp >> int_tmp2);
@@ -1240,6 +1270,8 @@ bool VarValue::operator ==(const VarValue& x) {
 			n = x.double_value;
 		else if ( x.valuetype == STRING_TYPE ) {
 			if ( allDigit(x.str_value) ) {
+				ss.clear();
+				ss.str("");
 				ss << x.str_value;
 				ss >> n;
 			} else {
@@ -1278,6 +1310,8 @@ bool VarValue::operator !=(const VarValue& x) {
 			n = x.double_value;
 		else if ( x.valuetype == STRING_TYPE ) {
 			if ( hasDigit(x.str_value) ) {
+				ss.clear();
+				ss.str("");
 				ss << x.str_value;
 				ss >> n;
 			} else {
@@ -1316,6 +1350,8 @@ bool VarValue::operator <(const VarValue& x) {
 			n = x.double_value;
 		else if ( x.valuetype == STRING_TYPE ) {
 			if ( hasDigit(x.str_value) ) {
+				ss.clear();
+				ss.str("");
 				ss << x.str_value;
 				ss >> n;
 			} else {
@@ -1354,6 +1390,8 @@ bool VarValue::operator <=(const VarValue& x) {
 			n = x.double_value;
 		else if ( x.valuetype == STRING_TYPE ) {
 			if ( hasDigit(x.str_value) ) {
+				ss.clear();
+				ss.str("");
 				ss << x.str_value;
 				ss >> n;
 			} else {
@@ -1392,6 +1430,8 @@ bool VarValue::operator >(const VarValue& x) {
 			n = x.double_value;
 		else if ( x.valuetype == STRING_TYPE ) {
 			if ( hasDigit(x.str_value) ) {
+				ss.clear();
+				ss.str("");
 				ss << x.str_value;
 				ss >> n;
 			} else {
@@ -1430,6 +1470,8 @@ bool VarValue::operator >=(const VarValue& x) {
 			n = x.double_value;
 		else if ( x.valuetype == STRING_TYPE ) {
 			if ( hasDigit(x.str_value) ) {
+				ss.clear();
+				ss.str("");
 				ss << x.str_value;
 				ss >> n;
 			} else {
