@@ -30,6 +30,7 @@ inline int allDigit(string s) {
 		return 0;
 	else if ( dot == 1 )
 		return 1;
+	return -1;
 }
 
 void Function::print(){
@@ -262,6 +263,9 @@ VarValue VarValue::operator +(const VarValue& x) {
 		}
 	} else if ( this->valuetype == INT_TYPE ) {
 		switch ( x.valuetype ) {
+			case UNDEFINED_TYPE:
+				return VarValue(this->toString() + "undefined");
+				break;
 			case INT_TYPE:
 				return VarValue(this->int_value + x.int_value);
 				break;
@@ -278,6 +282,9 @@ VarValue VarValue::operator +(const VarValue& x) {
 		}
 	} else if ( this->valuetype == DOUBLE_TYPE ) {
 		switch ( x.valuetype ) {
+			case UNDEFINED_TYPE:
+				return VarValue(this->toString() + "undefined");
+				break;
 			case INT_TYPE:
 				return VarValue(this->double_value + x.int_value);
 				break;
@@ -294,6 +301,9 @@ VarValue VarValue::operator +(const VarValue& x) {
 		}
 	} else if ( this->valuetype == STRING_TYPE ) {
 		switch ( x.valuetype ) {
+			case UNDEFINED_TYPE:
+				return VarValue(this->toString() + "undefined");
+				break;
 			case INT_TYPE:
 				ss << x.int_value;
 				break;
@@ -311,6 +321,7 @@ VarValue VarValue::operator +(const VarValue& x) {
 	} else {
 		throw Exception("invalid valuetype for +");
 	}
+	return VarValue();
 }
 
 VarValue VarValue::operator -(const VarValue& x) {
@@ -389,6 +400,7 @@ VarValue VarValue::operator -(const VarValue& x) {
 	} else {
 		throw Exception("invalid valuetype for -");
 	}
+	return VarValue();
 }
 
 VarValue VarValue::operator *(const VarValue& x) {
@@ -467,6 +479,7 @@ VarValue VarValue::operator *(const VarValue& x) {
 	} else {
 		throw Exception("invalid valuetype for *");
 	}
+	return VarValue();
 }
 
 VarValue VarValue::operator /(const VarValue& x) {
@@ -545,6 +558,7 @@ VarValue VarValue::operator /(const VarValue& x) {
 	} else {
 		throw Exception("invalid valuetype for /");
 	}
+	return VarValue();
 }
 
 VarValue VarValue::operator %(const VarValue& x) {
@@ -624,6 +638,7 @@ VarValue VarValue::operator %(const VarValue& x) {
 	} else {
 		throw Exception("invalid valuetype for \%");
 	}
+	return VarValue();
 }
 
 VarValue VarValue::operator <<(const VarValue& x) {
@@ -688,6 +703,7 @@ VarValue VarValue::operator <<(const VarValue& x) {
 	} else {
 		throw Exception("NaN Error");
 	}
+	return VarValue();
 }
 
 VarValue VarValue::operator >>(const VarValue& x) {
@@ -752,7 +768,9 @@ VarValue VarValue::operator >>(const VarValue& x) {
 	} else {
 		throw Exception("NaN Error");
 	}
+	return VarValue();
 }
+
 /*
 VarValue VarValue::operator =(const VarValue& x) {
 	if ( x.valuetype == INT_TYPE )
@@ -820,6 +838,7 @@ VarValue VarValue::operator +=(const VarValue& x) {
 	} else {
 		throw Exception("invalid valuetype for +");
 	}
+	return VarValue();
 }
 
 VarValue VarValue::operator -=(const VarValue& x) {
@@ -898,6 +917,7 @@ VarValue VarValue::operator -=(const VarValue& x) {
 	} else {
 		throw Exception("invalid valuetype for -");
 	}
+	return VarValue();
 }
 
 VarValue VarValue::operator *=(const VarValue& x) {
@@ -976,6 +996,7 @@ VarValue VarValue::operator *=(const VarValue& x) {
 	} else {
 		throw Exception("invalid valuetype for *");
 	}
+	return VarValue();
 }
 
 VarValue VarValue::operator /=(const VarValue& x) {
@@ -1054,6 +1075,7 @@ VarValue VarValue::operator /=(const VarValue& x) {
 	} else {
 		throw Exception("invalid valuetype for /");
 	}
+	return VarValue();
 }
 
 VarValue VarValue::operator %=(const VarValue& x) {
@@ -1133,6 +1155,7 @@ VarValue VarValue::operator %=(const VarValue& x) {
 	} else {
 		throw Exception("invalid valuetype for \%");
 	}
+	return VarValue();
 }
 
 
@@ -1198,6 +1221,7 @@ VarValue VarValue::operator <<=(const VarValue& x) {
 	} else {
 		throw Exception("NaN Error");
 	}
+	return VarValue();
 }
 
 VarValue VarValue::operator >>=(const VarValue& x) {
@@ -1262,6 +1286,7 @@ VarValue VarValue::operator >>=(const VarValue& x) {
 	} else {
 		throw Exception("NaN Error");
 	}
+	return VarValue();
 }
 
 
